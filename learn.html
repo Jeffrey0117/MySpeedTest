@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>測速原理 - MySpeedTest</title>
+  <meta name="description" content="深入了解網速測試的原理：為什麼測速結果會不準？Mbps 跟實際下載有什麼關係？">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f8f8f8;
+      --bg-light: #ffffff;
+      --bg-card: #ffffff;
+      --white: #1a1a1a;
+      --red: #ff4757;
+      --yellow: #ff9500;
+      --blue: #3742fa;
+      --gray: #666666;
+      --gray-dark: #e0e0e0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      line-height: 1.8;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 40px;
+      border-bottom: 1px solid var(--gray-dark);
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--red);
+      border-radius: 50%;
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+
+    nav a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--white);
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 7vw, 56px);
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      color: #ff9500;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Content */
+    .content {
+      max-width: 750px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    .section {
+      margin-bottom: 70px;
+    }
+
+    .section h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section h2::before {
+      content: '';
+      width: 4px;
+      height: 28px;
+      background: var(--yellow);
+      border-radius: 2px;
+    }
+
+    .section h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 35px 0 15px;
+      color: var(--white);
+    }
+
+    .section p {
+      margin-bottom: 18px;
+      color: var(--gray);
+      font-size: 16px;
+    }
+
+    .section strong {
+      color: var(--white);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: var(--bg-card);
+      border-left: 3px solid var(--yellow);
+      padding: 20px 25px;
+      margin: 25px 0;
+      border-radius: 0 12px 12px 0;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+    }
+
+    .info-box.blue {
+      border-left-color: var(--blue);
+    }
+
+    .info-box h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #ff9500;
+    }
+
+    .info-box.blue h4 {
+      color: var(--blue);
+    }
+
+    .info-box p {
+      margin-bottom: 0;
+      font-size: 15px;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px 25px;
+      margin: 25px 0;
+      overflow-x: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 14px;
+      color: #e0e0e0;
+      line-height: 1.6;
+    }
+
+    .code-block .highlight {
+      color: #ffa502;
+    }
+
+    .code-block .comment {
+      color: #666;
+    }
+
+    /* List */
+    .section ul {
+      list-style: none;
+      margin: 20px 0;
+    }
+
+    .section ul li {
+      position: relative;
+      padding-left: 25px;
+      margin-bottom: 12px;
+      color: var(--gray);
+    }
+
+    .section ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 8px;
+      height: 8px;
+      background: var(--yellow);
+      border-radius: 50%;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-dark);
+    }
+
+    th {
+      color: #ff9500;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    td {
+      color: var(--gray);
+      font-size: 15px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px;
+      text-align: center;
+      border-top: 1px solid var(--gray-dark);
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--gray);
+    }
+
+    footer a {
+      color: var(--gray);
+      text-decoration: none;
+      margin: 0 15px;
+    }
+
+    footer a:hover {
+      color: var(--white);
+    }
+
+    /* 響應式 */
+    @media (max-width: 768px) {
+      header {
+        padding: 20px;
+      }
+
+      .hero {
+        padding: 60px 20px 40px;
+      }
+
+      .section h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-icon"></div>
+      MST
+    </a>
+    <nav>
+      <a href="/">測速</a>
+      <a href="/learn" class="active">原理</a>
+      <a href="/sdk">SDK</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>測速<span>原理</span></h1>
+    <p>不只告訴你速度，還解釋為什麼</p>
+  </section>
+
+  <main class="content">
+    <!-- 基本原理 -->
+    <section class="section">
+      <h2>測速怎麼運作？</h2>
+
+      <p>網速測試的原理很簡單：<strong>在固定時間內，下載盡可能多的資料，然後計算速度。</strong></p>
+
+      <div class="code-block">
+<span class="comment">// 測速公式</span>
+速度 = 下載的資料量 ÷ 花費的時間
+
+<span class="comment">// 例如：2 秒內下載了 25 MB</span>
+速度 = <span class="highlight">25 MB</span> ÷ <span class="highlight">2 秒</span> = 12.5 MB/s = <span class="highlight">100 Mbps</span>
+      </div>
+
+      <div class="info-box">
+        <h4>MB vs Mbps</h4>
+        <p>網路速度用「bits」計算，檔案大小用「bytes」。<br>1 byte = 8 bits，所以 12.5 MB/s = 100 Mbps。</p>
+      </div>
+    </section>
+
+    <!-- 為什麼 MST 這麼快 -->
+    <section class="section">
+      <h2>為什麼 MST 只要 1.5 秒？</h2>
+
+      <p>傳統觀念認為「測越久越準」，這是<strong>錯的</strong>。</p>
+
+      <p>測速的準確度取決於：<strong>頻寬有沒有被跑滿</strong>。如果連線已經達到最大速度，測 2 秒和測 20 秒的結果是一樣的。</p>
+
+      <h3>MST 的三個技術</h3>
+
+      <ul>
+        <li><strong>4 條連線並行</strong> — 快速吃滿頻寬，避免單一連線的瓶頸</li>
+        <li><strong>Range 請求</strong> — 跳過 TCP slow start，直接全速下載</li>
+        <li><strong>智慧驗證</strong> — 偵測到波動時自動延長，確保準確</li>
+      </ul>
+
+      <div class="info-box blue">
+        <h4>智慧延長機制</h4>
+        <p>MST 會在 1.5 秒後檢查結果穩定性。如果變異係數 > 15%，會自動再跑 2 秒驗證。</p>
+      </div>
+    </section>
+
+    <!-- 為什麼不準 -->
+    <section class="section">
+      <h2>測速結果為什麼會「不準」？</h2>
+
+      <p>很多人發現：實際下載速度跟測速結果差很多。這是正常的：</p>
+
+      <h3>1. 測速用的是「最佳條件」</h3>
+      <p>測速工具選擇最近的伺服器、多條連線並行。但實際下載時，伺服器可能在國外、只有單一連線。</p>
+
+      <h3>2. 協定開銷</h3>
+      <p>網路傳輸不只有「資料」，還有封包標頭、確認訊號。這些開銷會佔用約 5-10% 頻寬。</p>
+
+      <h3>3. Wi-Fi 干擾</h3>
+      <p>無線訊號會受到牆壁、鄰居 Wi-Fi、藍牙設備的干擾。</p>
+    </section>
+
+    <!-- 速度對照 -->
+    <section class="section">
+      <h2>Mbps 對照表</h2>
+
+      <table>
+        <tr>
+          <th>測速結果</th>
+          <th>理論下載</th>
+          <th>實際下載</th>
+        </tr>
+        <tr>
+          <td>50 Mbps</td>
+          <td>6.25 MB/s</td>
+          <td>5-6 MB/s</td>
+        </tr>
+        <tr>
+          <td>100 Mbps</td>
+          <td>12.5 MB/s</td>
+          <td>10-11 MB/s</td>
+        </tr>
+        <tr>
+          <td>300 Mbps</td>
+          <td>37.5 MB/s</td>
+          <td>30-35 MB/s</td>
+        </tr>
+        <tr>
+          <td>1 Gbps</td>
+          <td>125 MB/s</td>
+          <td>100-115 MB/s</td>
+        </tr>
+      </table>
+
+      <div class="info-box">
+        <h4>快速換算</h4>
+        <p>Mbps ÷ 10 ≈ 實際下載速度（MB/s）</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      <a href="/">測速</a>
+      <a href="/sdk">開發者 SDK</a>
+      <a href="#">GitHub</a>
+    </p>
+    <p style="margin-top: 15px;">&copy; 2025 MySpeedTest</p>
+  </footer>
+</body>
+</html>

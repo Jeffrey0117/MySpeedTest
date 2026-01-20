@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySpeedTest - 瞬測網速</title>
+  <meta name="description" content="MST 瞬間測出你的網速。開源、免費、不需安裝。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f8f8f8;
+      --bg-light: #ffffff;
+      --white: #1a1a1a;
+      --red: #ff4757;
+      --yellow: #ff9500;
+      --blue: #3742fa;
+      --gray: #666666;
+      --gray-dark: #e0e0e0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Header ===== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 40px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--red);
+      border-radius: 50%;
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+
+    nav a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--white);
+    }
+
+    /* ===== Main ===== */
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 200px);
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    /* 幾何裝飾 */
+    .geo {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .geo-circle {
+      width: 350px;
+      height: 350px;
+      border: 2px solid var(--yellow);
+      border-radius: 50%;
+      top: 5%;
+      left: -120px;
+      opacity: 0.4;
+    }
+
+    .geo-square {
+      width: 180px;
+      height: 180px;
+      border: 2px solid var(--blue);
+      bottom: 10%;
+      right: 3%;
+      opacity: 0.4;
+      transform: rotate(15deg);
+    }
+
+    .geo-triangle {
+      width: 0;
+      height: 0;
+      border-left: 100px solid transparent;
+      border-right: 100px solid transparent;
+      border-bottom: 170px solid var(--red);
+      opacity: 0.15;
+      top: 15%;
+      right: 12%;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 10vw, 80px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 .fast {
+      color: #ff9500;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 3vw, 20px);
+      color: var(--gray);
+      font-weight: 400;
+    }
+
+    /* 測速區 */
+    .speedtest {
+      text-align: center;
+      position: relative;
+    }
+
+    .speed-display {
+      margin-bottom: 40px;
+    }
+
+    .speed {
+      font-size: clamp(100px, 25vw, 180px);
+      font-weight: 300;
+      line-height: 1;
+      color: var(--white);
+      transition: all 0.1s ease;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .speed.active {
+      color: #ff9500;
+    }
+
+    .unit {
+      font-size: clamp(20px, 4vw, 32px);
+      color: var(--gray);
+      font-weight: 500;
+      letter-spacing: 6px;
+      margin-top: 10px;
+    }
+
+    /* GO 按鈕 */
+    .go-btn {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid var(--white);
+      background: transparent;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .go-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--white);
+      transform: scale(0);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .go-btn:hover::before {
+      transform: scale(1);
+    }
+
+    .go-btn:hover {
+      color: var(--bg);
+    }
+
+    .go-btn .label {
+      position: relative;
+      z-index: 1;
+    }
+
+    .go-btn.running {
+      border-color: var(--yellow);
+      animation: pulse 1s ease infinite;
+    }
+
+    .go-btn.running .label {
+      font-size: 14px;
+    }
+
+    .go-btn.verifying {
+      border-color: var(--blue);
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 165, 2, 0.4); }
+      50% { box-shadow: 0 0 0 20px rgba(255, 165, 2, 0); }
+    }
+
+    .status {
+      margin-top: 30px;
+      font-size: 14px;
+      color: var(--gray);
+      min-height: 20px;
+    }
+
+    .status .verifying {
+      color: var(--blue);
+    }
+
+    /* 特色標籤 */
+    .tags {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #ffffff;
+      border-radius: 100px;
+      font-size: 13px;
+      color: #1a1a1a;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .tag-dot.red { background: var(--red); }
+    .tag-dot.yellow { background: var(--yellow); }
+    .tag-dot.blue { background: var(--blue); }
+
+    /* ===== 說明區 ===== */
+    .explain {
+      max-width: 700px;
+      margin: 80px auto 0;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .explain h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--white);
+    }
+
+    .explain p {
+      font-size: 15px;
+      color: var(--gray);
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    .explain strong {
+      color: #ff9500;
+    }
+
+    .explain a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .explain a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      padding: 40px;
+      text-align: center;
+      border-top: 1px solid var(--gray-dark);
+      margin-top: 80px;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--gray);
+    }
+
+    footer a {
+      color: var(--gray);
+      text-decoration: none;
+      margin: 0 15px;
+    }
+
+    footer a:hover {
+      color: var(--white);
+    }
+
+    /* ===== 響應式 ===== */
+    @media (max-width: 768px) {
+      header {
+        padding: 20px;
+      }
+
+      nav {
+        gap: 20px;
+      }
+
+      .go-btn {
+        width: 130px;
+        height: 130px;
+        font-size: 24px;
+      }
+
+      .geo {
+        display: none;
+      }
+
+      .tags {
+        gap: 10px;
+      }
+
+      .tag {
+        padding: 8px 15px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-icon"></div>
+      MST
+    </a>
+    <nav>
+      <a href="/learn">原理</a>
+      <a href="/sdk">SDK</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 幾何裝飾 -->
+    <div class="geo geo-circle"></div>
+    <div class="geo geo-square"></div>
+    <div class="geo geo-triangle"></div>
+
+    <section class="hero">
+      <h1>瞬間<span class="fast">測速</span></h1>
+      <p>快到你來不及眨眼，準到你不敢相信</p>
+    </section>
+
+    <section class="speedtest">
+      <div class="speed-display">
+        <div class="speed" id="speed">0</div>
+        <div class="unit" id="unit">Mbps</div>
+      </div>
+
+      <button class="go-btn" id="goBtn" onclick="startTest()">
+        <span class="label">GO</span>
+      </button>
+
+      <div class="status" id="status"></div>
+    </section>
+
+    <div class="tags">
+      <div class="tag"><span class="tag-dot red"></span>1.5 秒初步結果</div>
+      <div class="tag"><span class="tag-dot yellow"></span>自動驗證準度</div>
+      <div class="tag"><span class="tag-dot blue"></span>開源可驗證</div>
+    </div>
+
+    <section class="explain">
+      <h2>智慧測速，快又準</h2>
+      <p>MST 會在 <strong>1.5 秒</strong>內給你初步結果，然後自動在背景驗證。</p>
+      <p>如果結果穩定，就直接完成；如果偵測到波動，會自動延長確保準確。</p>
+      <p><a href="/learn">→ 了解測速原理</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      <a href="/learn">測速原理</a>
+      <a href="/sdk">開發者 SDK</a>
+      <a href="#">GitHub</a>
+    </p>
+    <p style="margin-top: 15px;">&copy; 2025 MySpeedTest</p>
+  </footer>
+
+  <script src="/sdk/mst.js"></script>
+  <script>
+    let mst = null;
+    let samples = [];
+
+    async function startTest() {
+      const btn = document.getElementById('goBtn');
+      const speedEl = document.getElementById('speed');
+      const unitEl = document.getElementById('unit');
+      const statusEl = document.getElementById('status');
+
+      if (mst && mst.isRunning) {
+        mst.stop();
+        return;
+      }
+
+      samples = [];
+      let firstResult = null;
+
+      // 第一階段：1.5 秒快速測試
+      mst = new MST({
+        duration: 1500,
+        maxConnections: 4,
+        updateInterval: 50,
+      });
+
+      btn.classList.add('running');
+      btn.querySelector('.label').textContent = 'STOP';
+      speedEl.classList.add('active');
+      speedEl.textContent = '0';
+
+      mst
+        .on('start', () => {
+          statusEl.textContent = '連接中...';
+        })
+        .on('targets', () => {
+          statusEl.textContent = '';
+        })
+        .on('progress', ({ speed }) => {
+          speedEl.textContent = speed.value;
+          unitEl.textContent = speed.unit;
+          samples.push(speed.raw);
+        })
+        .on('complete', async (result) => {
+          firstResult = result;
+          speedEl.textContent = result.speed.value;
+          unitEl.textContent = result.speed.unit;
+
+          // 計算穩定性（最後 5 個樣本的變異係數）
+          const recentSamples = samples.slice(-10);
+          const avg = recentSamples.reduce((a, b) => a + b, 0) / recentSamples.length;
+          const variance = recentSamples.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / recentSamples.length;
+          const cv = Math.sqrt(variance) / avg; // 變異係數
+
+          if (cv > 0.15) {
+            // 不穩定，延長測試
+            statusEl.innerHTML = '<span class="verifying">驗證中...</span>';
+            btn.classList.remove('running');
+            btn.classList.add('verifying');
+
+            await runVerification(speedEl, unitEl, statusEl, btn, result);
+          } else {
+            // 穩定，直接完成
+            statusEl.textContent = `${(result.bytes / 1024 / 1024).toFixed(1)} MB`;
+            resetButton();
+            reportResult(result);
+          }
+        })
+        .on('error', ({ message }) => {
+          statusEl.textContent = message;
+          resetButton();
+        });
+
+      try {
+        await mst.run();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function runVerification(speedEl, unitEl, statusEl, btn, firstResult) {
+      // 第二階段：額外 2 秒驗證
+      mst = new MST({
+        duration: 2000,
+        maxConnections: 4,
+        updateInterval: 50,
+      });
+
+      let verifyResult = null;
+
+      mst
+        .on('progress', ({ speed }) => {
+          speedEl.textContent = speed.value;
+          unitEl.textContent = speed.unit;
+        })
+        .on('complete', (result) => {
+          verifyResult = result;
+
+          // 計算平均值
+          const avgSpeed = (firstResult.speed.raw + result.speed.raw) / 2;
+          const formatted = MST.formatSpeed(avgSpeed);
+
+          speedEl.textContent = formatted.value;
+          unitEl.textContent = formatted.unit;
+          statusEl.textContent = `已驗證 · ${((firstResult.bytes + result.bytes) / 1024 / 1024).toFixed(1)} MB`;
+
+          resetButton();
+          reportResult({
+            speed: formatted,
+            bytes: firstResult.bytes + result.bytes,
+            duration: firstResult.duration + result.duration,
+          });
+        });
+
+      try {
+        await mst.run();
+      } catch (e) {
+        console.error(e);
+        resetButton();
+      }
+    }
+
+    function resetButton() {
+      const btn = document.getElementById('goBtn');
+      btn.classList.remove('running', 'verifying');
+      btn.querySelector('.label').textContent = 'GO';
+      document.getElementById('speed').classList.remove('active');
+    }
+
+    async function reportResult(result) {
+      try {
+        await fetch('/api/mst/results', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            speed: result.speed,
+            bytes: result.bytes,
+            duration: result.duration,
+          }),
+        });
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>

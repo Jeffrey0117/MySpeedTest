@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MST SDK - 開源測速 SDK</title>
+  <meta name="description" content="MST SDK 是一個開源的網速測試 SDK。前端執行、完全透明、易於整合。用程式碼理解測速原理。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f8f8f8;
+      --bg-light: #ffffff;
+      --bg-card: #ffffff;
+      --white: #1a1a1a;
+      --red: #ff4757;
+      --yellow: #ff9500;
+      --blue: #3742fa;
+      --gray: #666666;
+      --gray-dark: #e0e0e0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      line-height: 1.8;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 40px;
+      border-bottom: 1px solid var(--gray-dark);
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--red);
+      border-radius: 50%;
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+
+    nav a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--white);
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 7vw, 56px);
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      color: var(--blue);
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--white);
+      border: 2px solid var(--gray-dark);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+
+    /* Features */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    .feature {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 30px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon.red { background: rgba(255, 71, 87, 0.2); }
+    .feature-icon.yellow { background: rgba(255, 165, 2, 0.2); }
+    .feature-icon.blue { background: rgba(55, 66, 250, 0.2); }
+
+    .feature h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* Content */
+    .content {
+      max-width: 750px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    .section {
+      margin-bottom: 70px;
+    }
+
+    .section h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section h2::before {
+      content: '';
+      width: 4px;
+      height: 28px;
+      background: var(--yellow);
+      border-radius: 2px;
+    }
+
+    .section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 30px 0 15px;
+      color: var(--white);
+    }
+
+    .section p {
+      margin-bottom: 15px;
+      color: var(--gray);
+      font-size: 16px;
+    }
+
+    .section strong {
+      color: var(--white);
+    }
+
+    /* Code Block */
+    .code-block {
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .code-header {
+      background: #252525;
+      padding: 12px 20px;
+      font-size: 13px;
+      color: #888;
+      border-bottom: 1px solid #333;
+    }
+
+    .code-content {
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-content code {
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-size: 13px;
+      color: #e0e0e0;
+      white-space: pre;
+      line-height: 1.6;
+    }
+
+    .comment { color: #666; }
+    .keyword { color: #82aaff; }
+    .string { color: #c3e88d; }
+    .function { color: #ffa502; }
+    .number { color: #ff4757; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-dark);
+    }
+
+    th {
+      color: #ff9500;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    td {
+      color: var(--gray);
+      font-size: 15px;
+    }
+
+    td code {
+      background: rgba(255,255,255,0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 13px;
+      color: var(--white);
+    }
+
+    /* Demo */
+    .demo-panel {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      margin: 30px 0;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+
+    .demo-speed {
+      font-size: 72px;
+      font-weight: 300;
+      color: #ff9500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .demo-unit {
+      font-size: 18px;
+      color: var(--gray);
+      letter-spacing: 4px;
+      margin-bottom: 25px;
+    }
+
+    .demo-btn {
+      padding: 14px 40px;
+      background: #1a1a1a;
+      color: #ffffff;
+      border: none;
+      border-radius: 100px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .demo-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .demo-btn.running {
+      background: #ff9500;
+    }
+
+    .demo-status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--gray);
+      min-height: 20px;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: var(--bg-card);
+      border-left: 3px solid var(--blue);
+      padding: 20px 25px;
+      margin: 25px 0;
+      border-radius: 0 12px 12px 0;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+    }
+
+    .info-box p {
+      margin-bottom: 0;
+      font-size: 15px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px;
+      text-align: center;
+      border-top: 1px solid var(--gray-dark);
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--gray);
+    }
+
+    footer a {
+      color: var(--gray);
+      text-decoration: none;
+      margin: 0 15px;
+    }
+
+    footer a:hover {
+      color: var(--white);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 20px;
+      }
+
+      .hero {
+        padding: 60px 20px 40px;
+      }
+
+      .section h2 {
+        font-size: 24px;
+      }
+
+      .demo-speed {
+        font-size: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-icon"></div>
+      MST
+    </a>
+    <nav>
+      <a href="/">測速</a>
+      <a href="/learn">原理</a>
+      <a href="/sdk" class="active">SDK</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>MST <span>SDK</span></h1>
+    <p>開源、透明、易於整合的網速測試 SDK<br>用程式碼理解測速原理</p>
+    <div class="hero-btns">
+      <a href="https://github.com/user/mst" class="btn btn-primary" target="_blank">GitHub</a>
+      <a href="/sdk/mst.js" class="btn btn-secondary" download>下載 SDK</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <div class="feature-icon red">🌐</div>
+      <h3>前端執行</h3>
+      <p>測速在用戶瀏覽器執行，測到的是真實的用戶網速。</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon yellow">📖</div>
+      <h3>完全開源</h3>
+      <p>程式碼完全公開，每一行測速邏輯都可以驗證。</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon blue">⚡</div>
+      <h3>輕量快速</h3>
+      <p>SDK 只有 5KB，零依賴，支援 ES Module。</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon red">🎯</div>
+      <h3>事件驅動</h3>
+      <p>即時進度回報，輕鬆整合到任何 UI 框架。</p>
+    </div>
+  </section>
+
+  <main class="content">
+    <!-- Quick Start -->
+    <section class="section">
+      <h2>快速開始</h2>
+
+      <h3>1. 引入 SDK</h3>
+      <div class="code-block">
+        <div class="code-header">HTML</div>
+        <div class="code-content">
+          <code>&lt;<span class="keyword">script</span> <span class="function">src</span>=<span class="string">"/sdk/mst.js"</span>&gt;&lt;/<span class="keyword">script</span>&gt;</code>
+        </div>
+      </div>
+
+      <h3>2. 執行測速</h3>
+      <div class="code-block">
+        <div class="code-header">JavaScript</div>
+        <div class="code-content">
+          <code><span class="comment">// 建立實例</span>
+<span class="keyword">const</span> mst = <span class="keyword">new</span> <span class="function">MST</span>();
+
+<span class="comment">// 監聽進度</span>
+mst.<span class="function">on</span>(<span class="string">'progress'</span>, ({ speed }) =&gt; {
+  console.<span class="function">log</span>(speed.value, speed.unit);
+});
+
+<span class="comment">// 測速完成</span>
+mst.<span class="function">on</span>(<span class="string">'complete'</span>, (result) =&gt; {
+  console.<span class="function">log</span>(<span class="string">'完成:'</span>, result.speed);
+});
+
+<span class="comment">// 執行</span>
+<span class="keyword">await</span> mst.<span class="function">run</span>();</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Demo -->
+    <section class="section">
+      <h2>Live Demo</h2>
+
+      <div class="demo-panel">
+        <div class="demo-speed" id="demoSpeed">0</div>
+        <div class="demo-unit" id="demoUnit">Mbps</div>
+        <button class="demo-btn" id="demoBtn" onclick="runDemo()">測試 SDK</button>
+        <div class="demo-status" id="demoStatus"></div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">Console Output</div>
+        <div class="code-content" style="max-height: 200px; overflow-y: auto;">
+          <code id="demoLog"><span class="comment">// 點擊上方按鈕查看輸出...</span></code>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Reference -->
+    <section class="section">
+      <h2>API Reference</h2>
+
+      <h3>Constructor</h3>
+      <div class="code-block">
+        <div class="code-content">
+          <code><span class="keyword">new</span> <span class="function">MST</span>(options)</code>
+        </div>
+      </div>
+
+      <table>
+        <tr>
+          <th>選項</th>
+          <th>類型</th>
+          <th>預設值</th>
+          <th>說明</th>
+        </tr>
+        <tr>
+          <td><code>apiEndpoint</code></td>
+          <td>string</td>
+          <td>/api/mst</td>
+          <td>後端 API 端點</td>
+        </tr>
+        <tr>
+          <td><code>duration</code></td>
+          <td>number</td>
+          <td>10000</td>
+          <td>測速時間（毫秒）</td>
+        </tr>
+        <tr>
+          <td><code>maxConnections</code></td>
+          <td>number</td>
+          <td>3</td>
+          <td>最大並行連線數</td>
+        </tr>
+        <tr>
+          <td><code>chunkSize</code></td>
+          <td>number</td>
+          <td>524288</td>
+          <td>下載區塊大小（bytes）</td>
+        </tr>
+      </table>
+
+      <h3>Methods</h3>
+      <table>
+        <tr>
+          <th>方法</th>
+          <th>說明</th>
+        </tr>
+        <tr>
+          <td><code>run()</code></td>
+          <td>執行測速，返回 Promise</td>
+        </tr>
+        <tr>
+          <td><code>stop()</code></td>
+          <td>停止測速</td>
+        </tr>
+        <tr>
+          <td><code>on(event, callback)</code></td>
+          <td>註冊事件監聽器</td>
+        </tr>
+        <tr>
+          <td><code>off(event, callback)</code></td>
+          <td>移除事件監聽器</td>
+        </tr>
+      </table>
+
+      <h3>Events</h3>
+      <table>
+        <tr>
+          <th>事件</th>
+          <th>觸發時機</th>
+          <th>資料</th>
+        </tr>
+        <tr>
+          <td><code>start</code></td>
+          <td>測速開始</td>
+          <td>{ timestamp }</td>
+        </tr>
+        <tr>
+          <td><code>targets</code></td>
+          <td>取得節點</td>
+          <td>{ targets, count }</td>
+        </tr>
+        <tr>
+          <td><code>progress</code></td>
+          <td>進度更新</td>
+          <td>{ progress, elapsed, bytes, speed }</td>
+        </tr>
+        <tr>
+          <td><code>complete</code></td>
+          <td>測速完成</td>
+          <td>{ speed, bytes, duration, targets }</td>
+        </tr>
+        <tr>
+          <td><code>error</code></td>
+          <td>發生錯誤</td>
+          <td>{ error, message }</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- Why Frontend -->
+    <section class="section">
+      <h2>為什麼測速要在前端執行？</h2>
+
+      <p>這是一個很多人會問的問題：「為什麼不在後端測速就好？」</p>
+
+      <p><strong>答案很簡單：測速一定要跑在頻寬瓶頸那一端。</strong></p>
+
+      <div class="code-block">
+        <div class="code-content">
+          <code><span class="comment">// 如果在後端測速...</span>
+[後端伺服器] ←→ [CDN]
+     ↑
+  測到的是「伺服器的網速」，不是用戶的
+
+<span class="comment">// 正確做法：在前端測速</span>
+[用戶瀏覽器] ←→ [CDN]
+     ↑
+  測到的是「用戶的網速」</code>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <p>MST SDK 的設計就是基於這個原理：後端只負責提供 CDN 節點資訊，真正的下載流量都在用戶的瀏覽器執行。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      <a href="/">測速</a>
+      <a href="/learn">測速原理</a>
+      <a href="#">GitHub</a>
+    </p>
+    <p style="margin-top: 15px;">&copy; 2025 MySpeedTest</p>
+  </footer>
+
+  <script src="/sdk/mst.js"></script>
+  <script>
+    let demoMst = null;
+
+    async function runDemo() {
+      const btn = document.getElementById('demoBtn');
+      const speedEl = document.getElementById('demoSpeed');
+      const unitEl = document.getElementById('demoUnit');
+      const statusEl = document.getElementById('demoStatus');
+      const logEl = document.getElementById('demoLog');
+
+      if (demoMst && demoMst.isRunning) {
+        demoMst.stop();
+        return;
+      }
+
+      demoMst = new MST({ duration: 5000 });
+
+      btn.textContent = 'STOP';
+      btn.classList.add('running');
+      speedEl.textContent = '0';
+      logEl.innerHTML = '';
+
+      function log(text) {
+        const time = new Date().toLocaleTimeString();
+        logEl.innerHTML += `<span class="comment">[${time}]</span> ${text}\n`;
+        logEl.parentElement.scrollTop = logEl.parentElement.scrollHeight;
+      }
+
+      demoMst
+        .on('start', () => {
+          log('<span class="keyword">Event:</span> start');
+          statusEl.textContent = '連接中...';
+        })
+        .on('targets', ({ targets, count }) => {
+          log(`<span class="keyword">Event:</span> targets (${count} nodes)`);
+          statusEl.textContent = '測速中...';
+        })
+        .on('progress', ({ speed, progress }) => {
+          speedEl.textContent = speed.value;
+          unitEl.textContent = speed.unit;
+        })
+        .on('complete', (result) => {
+          log(`<span class="keyword">Event:</span> complete`);
+          log(`<span class="function">Result:</span> ${result.speed.value} ${result.speed.unit}`);
+          log(`<span class="function">Downloaded:</span> ${(result.bytes / 1024 / 1024).toFixed(2)} MB`);
+          log(`<span class="function">Duration:</span> ${result.duration.toFixed(2)}s`);
+          statusEl.textContent = `${(result.bytes / 1024 / 1024).toFixed(1)} MB`;
+          btn.textContent = '再測一次';
+          btn.classList.remove('running');
+        })
+        .on('error', ({ message }) => {
+          log(`<span class="number">Error:</span> ${message}`);
+          statusEl.textContent = message;
+          btn.textContent = '重試';
+          btn.classList.remove('running');
+        });
+
+      try {
+        await demoMst.run();
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>
