@@ -40,6 +40,7 @@ app.use((req, res, next) => {
 // ============================================================
 app.get("/learn", (req, res) => res.sendFile(`${__dirname}/learn.html`));
 app.get("/sdk", (req, res) => res.sendFile(`${__dirname}/sdk.html`));
+app.get("/api", (req, res) => res.sendFile(`${__dirname}/api.html`));
 
 // ============================================================
 // API Routes: /api/mst
