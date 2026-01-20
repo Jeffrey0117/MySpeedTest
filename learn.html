@@ -27,6 +27,15 @@
       --gray-dark: #e0e0e0;
     }
 
+    [data-theme="dark"] {
+      --bg: #141418;
+      --bg-light: #1c1c22;
+      --bg-card: #202028;
+      --white: #ffffff;
+      --gray: #a0a0b0;
+      --gray-dark: #3a3a5a;
+    }
+
     body {
       font-family: 'Space Grotesk', -apple-system, sans-serif;
       background: var(--bg);
@@ -76,6 +85,30 @@
 
     nav a:hover, nav a.active {
       color: var(--white);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 2px solid var(--gray-dark);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--yellow);
     }
 
     /* Hero */
@@ -291,11 +324,16 @@
       <div class="logo-icon"></div>
       MST
     </a>
-    <nav>
-      <a href="/">測速</a>
-      <a href="/learn" class="active">原理</a>
-      <a href="/sdk">SDK</a>
-    </nav>
+    <div class="nav-right">
+      <nav>
+        <a href="/">測速</a>
+        <a href="/learn" class="active">原理</a>
+        <a href="/sdk">SDK</a>
+      </nav>
+      <button class="theme-toggle" onclick="toggleTheme()" title="切換深淺模式">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
   </header>
 
   <section class="hero">
@@ -409,5 +447,31 @@
     </p>
     <p style="margin-top: 15px;">&copy; 2025 MySpeedTest</p>
   </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('themeIcon');
+      const isDark = html.getAttribute('data-theme') === 'dark';
+
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+      }
+    })();
+  </script>
 </body>
 </html>
