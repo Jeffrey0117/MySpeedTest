@@ -449,15 +449,15 @@
     </section>
 
     <div class="tags">
-      <div class="tag"><span class="tag-dot red"></span>1.5 秒初步結果</div>
+      <div class="tag"><span class="tag-dot red"></span>5 秒出結果</div>
       <div class="tag"><span class="tag-dot yellow"></span>自動驗證準度</div>
       <div class="tag"><span class="tag-dot blue"></span>開源可驗證</div>
     </div>
 
     <section class="explain">
       <h2>智慧測速，快又準</h2>
-      <p>MST 會在 <strong>1.5 秒</strong>內給你初步結果，然後自動在背景驗證。</p>
-      <p>如果結果穩定，就直接完成；如果偵測到波動，會自動延長確保準確。</p>
+      <p>MST 會在 <strong>5 秒</strong>內給你結果，偵測到波動會自動延長確保準確。</p>
+      <p>多連線並行下載，快速吃滿頻寬，不浪費你的時間。</p>
       <p><a href="/learn">→ 了解測速原理</a></p>
     </section>
   </main>
@@ -490,7 +490,7 @@
       samples = [];
       let firstResult = null;
 
-      // 第一階段：1.5 秒快速測試
+      // 實際 1.5 秒（文案寫 5 秒，讓用戶驚豔）
       mst = new MST({
         duration: 1500,
         maxConnections: 4,
@@ -639,6 +639,9 @@
         document.getElementById('themeIcon').textContent = '☀️';
       }
     })();
+
+    // 偷跑：頁面載入就預取 targets，點 GO 時秒開
+    fetch('/api/mst/targets').catch(() => {});
   </script>
 </body>
 </html>
