@@ -681,6 +681,69 @@ mst.<span class="function">on</span>(<span class="string">'complete'</span>, (re
         <p>MST SDK 的設計就是基於這個原理：後端只負責提供 CDN 節點資訊，真正的下載流量都在用戶的瀏覽器執行。</p>
       </div>
     </section>
+
+    <!-- Backend API -->
+    <section class="section">
+      <h2>後端 API</h2>
+
+      <p>SDK 需要搭配後端 API 提供測速節點。我們提供<strong>單檔部署版</strong>，支援 Vercel、Railway 等平台。</p>
+
+      <div style="margin: 25px 0;">
+        <a href="/api/mst-api.js" class="btn btn-primary" download style="display: inline-block; padding: 14px 32px; background: #1a1a1a; color: #fff; border-radius: 100px; text-decoration: none; font-weight: 600;">下載 API (mst-api.js)</a>
+      </div>
+
+      <h3>API 端點</h3>
+      <table>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>說明</th>
+        </tr>
+        <tr>
+          <td><code>GET</code></td>
+          <td>/api/mst/targets</td>
+          <td>取得 CDN 測速節點</td>
+        </tr>
+        <tr>
+          <td><code>POST</code></td>
+          <td>/api/mst/results</td>
+          <td>儲存測速結果</td>
+        </tr>
+        <tr>
+          <td><code>GET</code></td>
+          <td>/api/mst/health</td>
+          <td>健康檢查</td>
+        </tr>
+      </table>
+
+      <h3>部署方式</h3>
+      <div class="code-block">
+        <div class="code-header">Vercel</div>
+        <div class="code-content">
+          <code><span class="comment"># 1. 放到 api/ 資料夾</span>
+<span class="comment"># 2. 部署到 Vercel</span>
+<span class="comment"># 3. 自動變成 /api/mst/* 端點</span></code>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">獨立運行</div>
+        <div class="code-content">
+          <code><span class="function">node</span> mst-api.js
+<span class="comment"># 跑在 http://localhost:3001</span></code>
+        </div>
+      </div>
+
+      <h3>前端指向自架 API</h3>
+      <div class="code-block">
+        <div class="code-header">JavaScript</div>
+        <div class="code-content">
+          <code><span class="keyword">const</span> mst = <span class="keyword">new</span> <span class="function">MST</span>({
+  <span class="function">apiEndpoint</span>: <span class="string">'https://your-api.vercel.app/api/mst'</span>
+});</code>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>

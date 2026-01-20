@@ -24,6 +24,7 @@ app.use(express.json());
 // 靜態檔案
 app.use(express.static(__dirname));
 app.use("/sdk", express.static(`${__dirname}/sdk`));
+app.use("/api", express.static(`${__dirname}/api`));
 
 // CORS
 app.use((req, res, next) => {
