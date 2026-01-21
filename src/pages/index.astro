@@ -1,11 +1,38 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "MST 測速",
+  "url": "https://myspeedtest.isnowfriend.com",
+  "description": "最快的免費網速測試工具，5 秒出結果，測試下載速度、上傳速度、延遲和抖動。",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TWD"
+  },
+  "featureList": ["下載速度測試", "上傳速度測試", "延遲測試", "抖動測試", "免安裝", "開源"],
+  "screenshot": "https://myspeedtest.isnowfriend.com/og-image.jpg"
+};
+
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "MST 測速",
+  "url": "https://myspeedtest.isnowfriend.com",
+  "logo": "https://myspeedtest.isnowfriend.com/og-image.jpg",
+  "sameAs": []
+};
 ---
 
 <BaseLayout
   title="⚡ MST 測速 - 最快的網速測試，不用等"
   description="最快的免費網速測試。5 秒出結果，不用等轉圈圈。免安裝、開源，打開就能測。"
   canonical="https://myspeedtest.isnowfriend.com/"
+  schema={[webAppSchema, orgSchema]}
 >
   <main>
     <!-- 幾何裝飾 -->

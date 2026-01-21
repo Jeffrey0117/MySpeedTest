@@ -14,7 +14,10 @@ export async function getStaticPaths() {
 }
 
 const { post, allPosts } = Astro.props;
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
+
+// Filter to only h2 and h3 for TOC
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 
 // Find related posts (same tags, exclude current)
 const relatedPosts = allPosts
@@ -115,6 +118,19 @@ const breadcrumbSchema = {
         )}
       </div>
     </header>
+
+    {tocHeadings.length >= 3 && (
+      <nav class="toc">
+        <div class="toc-title">目錄</div>
+        <ul>
+          {tocHeadings.map((heading) => (
+            <li class={`toc-item depth-${heading.depth}`}>
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
 
     <div class="post-content">
       <Content />
@@ -227,6 +243,52 @@ const breadcrumbSchema = {
   .tag:hover {
     background: var(--yellow);
     color: #000;
+  }
+
+  /* Table of Contents */
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--gray-dark);
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 40px;
+  }
+
+  .toc-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 15px;
+  }
+
+  .toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-item {
+    margin-bottom: 8px;
+  }
+
+  .toc-item a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: color 0.2s;
+  }
+
+  .toc-item a:hover {
+    color: var(--yellow);
+  }
+
+  .toc-item.depth-3 {
+    padding-left: 16px;
+  }
+
+  .toc-item.depth-3 a {
+    font-size: 13px;
   }
 
   .post-content {
