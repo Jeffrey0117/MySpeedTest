@@ -157,7 +157,10 @@ const breadcrumbSchema = {
     </nav>
 
     {post.slug === 'mst-introduction' && (
-      <button class="copy-btn" id="copyBtn">複製全文</button>
+      <>
+        <button class="copy-btn" id="copyBtn">複製全文 (Markdown)</button>
+        <textarea id="mdContent" style="display:none">{post.body}</textarea>
+      </>
     )}
   </article>
 </DocLayout>
@@ -565,14 +568,14 @@ const breadcrumbSchema = {
   var copyBtn = document.getElementById('copyBtn');
   if (copyBtn) {
     copyBtn.addEventListener('click', function() {
-      var content = document.querySelector('.post-content');
-      if (content) {
-        var text = content.innerText;
+      var mdContent = document.getElementById('mdContent');
+      if (mdContent) {
+        var text = mdContent.value;
         navigator.clipboard.writeText(text).then(function() {
           copyBtn.textContent = '已複製！';
           copyBtn.classList.add('copied');
           setTimeout(function() {
-            copyBtn.textContent = '複製全文';
+            copyBtn.textContent = '複製全文 (Markdown)';
             copyBtn.classList.remove('copied');
           }, 2000);
         });
