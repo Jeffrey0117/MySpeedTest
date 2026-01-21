@@ -6,12 +6,82 @@ export async function getStaticPaths() {
   const posts = await getCollection('blog');
   return posts.map((post) => ({
     params: { slug: post.slug },
-    props: { post },
+    props: {
+      post,
+      allPosts: posts
+    },
   }));
 }
 
-const { post } = Astro.props;
+const { post, allPosts } = Astro.props;
 const { Content } = await post.render();
+
+// Find related posts (same tags, exclude current)
+const relatedPosts = allPosts
+  .filter(p => p.slug !== post.slug)
+  .map(p => ({
+    ...p,
+    score: (p.data.tags || []).filter(tag => (post.data.tags || []).includes(tag)).length
+  }))
+  .filter(p => p.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 3);
+
+// Generate tag URL
+function tagUrl(tag: string) {
+  return '/blog/tags/' + tag.toLowerCase().replace(/\s+/g, '-').replace(/[.]/g, '');
+}
+
+// Article Schema
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": post.data.title,
+  "description": post.data.description,
+  "datePublished": post.data.date.toISOString(),
+  "author": {
+    "@type": "Organization",
+    "name": "MST 測速"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "MST 測速",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://myspeedtest.isnowfriend.com/og-image.jpg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://myspeedtest.isnowfriend.com/blog/${post.slug}`
+  }
+};
+
+// Breadcrumb Schema
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://myspeedtest.isnowfriend.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "部落格",
+      "item": "https://myspeedtest.isnowfriend.com/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": post.data.title,
+      "item": `https://myspeedtest.isnowfriend.com/blog/${post.slug}`
+    }
+  ]
+};
 ---
 
 <DocLayout
@@ -19,8 +89,17 @@ const { Content } = await post.render();
   description={post.data.description}
   canonical={'https://myspeedtest.isnowfriend.com/blog/' + post.slug}
   ogType="article"
+  schema={[articleSchema, breadcrumbSchema]}
 >
   <article class="blog-post">
+    <nav class="breadcrumb">
+      <a href="/">首頁</a>
+      <span>/</span>
+      <a href="/blog">部落格</a>
+      <span>/</span>
+      <span>{post.data.title.length > 20 ? post.data.title.slice(0, 20) + '...' : post.data.title}</span>
+    </nav>
+
     <header class="post-header">
       <h1>{post.data.title}</h1>
       <div class="post-meta">
@@ -30,7 +109,7 @@ const { Content } = await post.render();
         {post.data.tags && (
           <div class="tags">
             {post.data.tags.map((tag) => (
-              <span class="tag">{tag}</span>
+              <a href={tagUrl(tag)} class="tag">{tag}</a>
             ))}
           </div>
         )}
@@ -40,6 +119,26 @@ const { Content } = await post.render();
     <div class="post-content">
       <Content />
     </div>
+
+    {relatedPosts.length > 0 && (
+      <aside class="related-posts">
+        <h2>相關文章</h2>
+        <div class="related-grid">
+          {relatedPosts.map((related) => (
+            <a href={`/blog/${related.slug}`} class="related-item">
+              <span class="related-date">
+                {related.data.date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })}
+              </span>
+              <h3>{related.data.title}</h3>
+            </a>
+          ))}
+        </div>
+      </aside>
+    )}
+
+    <nav class="post-nav">
+      <a href="/blog" class="back-to-blog">← 返回部落格</a>
+    </nav>
   </article>
 </DocLayout>
 
@@ -47,7 +146,30 @@ const { Content } = await post.render();
   .blog-post {
     max-width: 800px;
     margin: 0 auto;
-    padding: 40px 20px 80px;
+    padding: 30px 20px 80px;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a {
+    color: var(--gray);
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--white);
+  }
+
+  .breadcrumb span:last-child {
+    color: var(--white);
   }
 
   .post-header {
@@ -56,7 +178,7 @@ const { Content } = await post.render();
     align-items: center;
     text-align: center;
     margin-bottom: 50px;
-    padding-top: 40px;
+    padding-top: 20px;
   }
 
   .post-header h1 {
@@ -97,6 +219,14 @@ const { Content } = await post.render();
     border-radius: 100px;
     font-size: 13px;
     white-space: nowrap;
+    color: var(--gray);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tag:hover {
+    background: var(--yellow);
+    color: #000;
   }
 
   .post-content {
@@ -214,13 +344,75 @@ const { Content } = await post.render();
     white-space: nowrap;
   }
 
+  /* Related Posts */
+  .related-posts {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid var(--gray-dark);
+  }
+
+  .related-posts h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 25px;
+  }
+
+  .related-grid {
+    display: grid;
+    gap: 15px;
+  }
+
+  .related-item {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--gray-dark);
+    border-radius: 10px;
+    padding: 18px 20px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .related-item:hover {
+    border-color: var(--yellow);
+    transform: translateX(5px);
+  }
+
+  .related-date {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .related-item h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .post-nav {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .back-to-blog {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .back-to-blog:hover {
+    color: var(--white);
+  }
+
   @media (max-width: 768px) {
     .blog-post {
-      padding: 30px 16px 60px;
+      padding: 20px 16px 60px;
     }
 
     .post-header {
-      padding-top: 30px;
+      padding-top: 20px;
       margin-bottom: 40px;
     }
 
@@ -254,6 +446,11 @@ const { Content } = await post.render();
     .post-content :global(pre) {
       padding: 15px;
       font-size: 13px;
+    }
+
+    .related-posts {
+      margin-top: 50px;
+      padding-top: 30px;
     }
   }
 

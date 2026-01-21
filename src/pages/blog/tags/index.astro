@@ -1,0 +1,177 @@
+---
+import { getCollection } from 'astro:content';
+import DocLayout from '../../../layouts/DocLayout.astro';
+
+const posts = await getCollection('blog');
+
+// Count tags
+const tagCounts = {};
+posts.forEach(post => {
+  (post.data.tags || []).forEach(tag => {
+    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+  });
+});
+
+// Sort by count
+const sortedTags = Object.entries(tagCounts)
+  .sort((a, b) => b[1] - a[1])
+  .map(([tag, count]) => ({ tag, count }));
+
+function tagUrl(tag: string) {
+  return '/blog/tags/' + tag.toLowerCase().replace(/\s+/g, '-').replace(/[.]/g, '');
+}
+---
+
+<DocLayout
+  title="所有標籤 - MST 測速部落格"
+  description="瀏覽所有文章標籤，找到你感興趣的網速測試、網路知識主題。"
+  canonical="https://myspeedtest.isnowfriend.com/blog/tags"
+  activeNav="blog"
+>
+  <div class="tags-page">
+    <nav class="breadcrumb">
+      <a href="/">首頁</a>
+      <span>/</span>
+      <a href="/blog">部落格</a>
+      <span>/</span>
+      <span>所有標籤</span>
+    </nav>
+
+    <header class="page-header">
+      <h1>所有標籤</h1>
+      <p>共 {sortedTags.length} 個標籤</p>
+    </header>
+
+    <div class="tags-cloud">
+      {sortedTags.map(({ tag, count }) => (
+        <a href={tagUrl(tag)} class="tag-item">
+          <span class="tag-name">{tag}</span>
+          <span class="tag-count">{count}</span>
+        </a>
+      ))}
+    </div>
+
+    <div class="back-link">
+      <a href="/blog">← 返回部落格</a>
+    </div>
+  </div>
+</DocLayout>
+
+<style>
+  .tags-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px 80px;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 40px;
+  }
+
+  .breadcrumb a {
+    color: var(--gray);
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--white);
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .page-header h1 {
+    font-size: clamp(28px, 5vw, 36px);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .page-header p {
+    color: var(--gray);
+    font-size: 15px;
+  }
+
+  .tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--gray-dark);
+    border-radius: 100px;
+    padding: 10px 18px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tag-item:hover {
+    border-color: var(--yellow);
+    background: var(--yellow);
+  }
+
+  .tag-item:hover .tag-name,
+  .tag-item:hover .tag-count {
+    color: #000;
+  }
+
+  .tag-name {
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .tag-count {
+    background: var(--bg-light);
+    color: var(--gray);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+
+  .tag-item:hover .tag-count {
+    background: rgba(0,0,0,0.2);
+  }
+
+  .back-link {
+    margin-top: 50px;
+    text-align: center;
+  }
+
+  .back-link a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .back-link a:hover {
+    color: var(--white);
+  }
+
+  @media (max-width: 768px) {
+    .tags-cloud {
+      gap: 10px;
+    }
+
+    .tag-item {
+      padding: 8px 14px;
+    }
+
+    .tag-name {
+      font-size: 13px;
+    }
+  }
+</style>

@@ -32,7 +32,11 @@ const ogImage = siteUrl + '/og-image.jpg';
   <meta name="twitter:description" content={description}>
   <meta name="twitter:image" content={ogImage}>
 
-  {schema && (
+  {schema && Array.isArray(schema) ? (
+    schema.map((s) => (
+      <script type="application/ld+json" set:html={JSON.stringify(s)} />
+    ))
+  ) : schema && (
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
   )}
 </head>

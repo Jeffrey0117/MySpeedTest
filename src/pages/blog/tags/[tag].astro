@@ -1,0 +1,178 @@
+---
+import { getCollection } from 'astro:content';
+import DocLayout from '../../../layouts/DocLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const allTags = [...new Set(posts.flatMap(post => post.data.tags || []))];
+
+  return allTags.map(tag => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-').replace(/[.]/g, '') },
+    props: {
+      tag,
+      posts: posts.filter(post => post.data.tags?.includes(tag))
+        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<DocLayout
+  title={`${tag} 相關文章 - MST 測速`}
+  description={`探索所有關於 ${tag} 的文章，了解網速測試、網路知識與實用技巧。`}
+  canonical={`https://myspeedtest.isnowfriend.com/blog/tags/${Astro.params.tag}`}
+  activeNav="blog"
+>
+  <div class="tag-page">
+    <nav class="breadcrumb">
+      <a href="/">首頁</a>
+      <span>/</span>
+      <a href="/blog">部落格</a>
+      <span>/</span>
+      <span>標籤：{tag}</span>
+    </nav>
+
+    <header class="tag-header">
+      <span class="tag-label">標籤</span>
+      <h1>{tag}</h1>
+      <p>共 {posts.length} 篇文章</p>
+    </header>
+
+    <div class="posts-list">
+      {posts.map((post) => (
+        <a href={`/blog/${post.slug}`} class="post-item">
+          <time datetime={post.data.date.toISOString()}>
+            {post.data.date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'short', day: 'numeric' })}
+          </time>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.description}</p>
+        </a>
+      ))}
+    </div>
+
+    <div class="back-link">
+      <a href="/blog">← 返回部落格</a>
+    </div>
+  </div>
+</DocLayout>
+
+<style>
+  .tag-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px 80px;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 40px;
+  }
+
+  .breadcrumb a {
+    color: var(--gray);
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--white);
+  }
+
+  .tag-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .tag-label {
+    display: inline-block;
+    background: var(--yellow);
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .tag-header h1 {
+    font-size: clamp(28px, 5vw, 36px);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .tag-header p {
+    color: var(--gray);
+    font-size: 15px;
+  }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .post-item {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--gray-dark);
+    border-radius: 12px;
+    padding: 25px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .post-item:hover {
+    border-color: var(--yellow);
+    transform: translateY(-2px);
+  }
+
+  .post-item time {
+    font-size: 13px;
+    color: var(--gray);
+  }
+
+  .post-item h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--white);
+    margin: 10px 0;
+    line-height: 1.4;
+  }
+
+  .post-item p {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+
+  .back-link {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .back-link a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .back-link a:hover {
+    color: var(--white);
+  }
+
+  @media (max-width: 768px) {
+    .post-item {
+      padding: 20px;
+    }
+
+    .post-item h2 {
+      font-size: 16px;
+    }
+  }
+</style>

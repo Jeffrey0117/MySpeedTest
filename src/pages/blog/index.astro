@@ -4,6 +4,22 @@ import DocLayout from '../../layouts/DocLayout.astro';
 
 const posts = await getCollection('blog');
 const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Get popular tags
+const tagCounts = {};
+posts.forEach(post => {
+  (post.data.tags || []).forEach(tag => {
+    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+  });
+});
+const popularTags = Object.entries(tagCounts)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 8)
+  .map(([tag]) => tag);
+
+function tagUrl(tag: string) {
+  return '/blog/tags/' + tag.toLowerCase().replace(/\s+/g, '-').replace(/[.]/g, '');
+}
 ---
 
 <DocLayout
@@ -18,6 +34,18 @@ const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.get
   </div>
 
   <div class="content">
+    <div class="tags-section">
+      <div class="tags-header">
+        <span>熱門標籤</span>
+        <a href="/blog/tags">查看全部 →</a>
+      </div>
+      <div class="tags-list">
+        {popularTags.map((tag) => (
+          <a href={tagUrl(tag)} class="tag-link">{tag}</a>
+        ))}
+      </div>
+    </div>
+
     <div class="posts-grid">
       {sortedPosts.map((post) => (
         <a href={`/blog/${post.slug}`} class="post-card">
@@ -40,6 +68,58 @@ const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.get
 </DocLayout>
 
 <style>
+  .tags-section {
+    margin-bottom: 40px;
+    padding: 25px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--gray-dark);
+  }
+
+  .tags-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .tags-header span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  .tags-header a {
+    font-size: 13px;
+    color: var(--gray);
+    text-decoration: none;
+  }
+
+  .tags-header a:hover {
+    color: var(--yellow);
+  }
+
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .tag-link {
+    background: var(--bg-light);
+    color: var(--gray);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tag-link:hover {
+    background: var(--yellow);
+    color: #000;
+  }
+
   .posts-grid {
     display: flex;
     flex-direction: column;
@@ -98,6 +178,10 @@ const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.get
   }
 
   @media (max-width: 768px) {
+    .tags-section {
+      padding: 20px;
+    }
+
     .post-card {
       padding: 20px;
     }
