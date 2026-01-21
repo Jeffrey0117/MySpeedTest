@@ -36,7 +36,7 @@ body {
 }
 
 /* ===== Header ===== */
-header {
+.doc-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -129,11 +129,37 @@ footer a:hover {
 
 /* ===== 響應式 ===== */
 @media (max-width: 768px) {
-  header {
+  .doc-header {
     padding: 20px;
   }
 
   nav {
-    gap: 20px;
+    gap: 15px;
+    font-size: 13px;
+  }
+
+  .nav-right {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .doc-header {
+    padding: 15px;
+  }
+
+  nav {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .nav-right {
+    gap: 10px;
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 }
