@@ -155,6 +155,10 @@ const breadcrumbSchema = {
     <nav class="post-nav">
       <a href="/blog" class="back-to-blog">← 返回部落格</a>
     </nav>
+
+    {post.slug === 'mst-introduction' && (
+      <button class="copy-btn" id="copyBtn">複製全文</button>
+    )}
   </article>
 </DocLayout>
 
@@ -468,6 +472,31 @@ const breadcrumbSchema = {
     color: var(--white);
   }
 
+  .copy-btn {
+    display: block;
+    margin: 30px auto 0;
+    padding: 14px 40px;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 165, 2, 0.3);
+  }
+
+  .copy-btn.copied {
+    background: var(--blue);
+    color: #fff;
+  }
+
   @media (max-width: 768px) {
     .blog-post {
       padding: 20px 16px 60px;
@@ -531,3 +560,23 @@ const breadcrumbSchema = {
     }
   }
 </style>
+
+<script is:inline>
+  var copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      var content = document.querySelector('.post-content');
+      if (content) {
+        var text = content.innerText;
+        navigator.clipboard.writeText(text).then(function() {
+          copyBtn.textContent = '已複製！';
+          copyBtn.classList.add('copied');
+          setTimeout(function() {
+            copyBtn.textContent = '複製全文';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+    });
+  }
+</script>
