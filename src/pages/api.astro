@@ -1,0 +1,154 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+---
+
+<DocLayout
+  title="⚡ MST API - 測速後端 API，單檔部署"
+  description="MST 測速後端 API。單檔部署，支援 Vercel、Railway、Cloudflare 等平台。開源免費，自架測速伺服器。"
+  canonical="https://myspeedtest.isnowfriend.com/api"
+  activeNav="api"
+>
+  <section class="hero">
+    <h1>後端 <span class="highlight-red">API</span></h1>
+    <p>提供測速節點的單檔 API，支援 Vercel、Railway 等平台部署</p>
+    <div class="hero-btns">
+      <a href="/api/mst-api.js" class="btn btn-primary" download>下載 mst-api.js</a>
+    </div>
+  </section>
+
+  <main class="content">
+    <section class="section">
+      <h2>為什麼需要後端？</h2>
+      <p>MST SDK 在瀏覽器執行測速，但需要後端提供<strong>測速節點 URL</strong>。</p>
+      <p>我們的 API 會向 CDN 服務請求高頻寬節點，然後回傳給前端使用。</p>
+      <div class="info-box blue">
+        <p>這是一個<strong>單檔設計</strong>，方便部署到任何 Node.js 環境或 Serverless 平台。</p>
+      </div>
+    </section>
+
+    <section class="section api-section">
+      <h2>API 端點</h2>
+      <table>
+        <tr><th>Method</th><th>Path</th><th>說明</th></tr>
+        <tr><td><code>GET</code></td><td>/api/mst/targets</td><td>取得 CDN 測速節點</td></tr>
+        <tr><td><code>POST</code></td><td>/api/mst/results</td><td>儲存測速結果</td></tr>
+        <tr><td><code>GET</code></td><td>/api/mst/health</td><td>健康檢查</td></tr>
+      </table>
+      <h3>Response 範例</h3>
+      <div class="code-block">
+        <div class="code-header">GET /api/mst/targets</div>
+        <div class="code-content">
+          <code>&#123;
+  <span class="string">"success"</span>: <span class="keyword">true</span>,
+  <span class="string">"targets"</span>: [
+    &#123;
+      <span class="string">"url"</span>: <span class="string">"https://..."</span>,
+      <span class="string">"city"</span>: <span class="string">"Taipei"</span>,
+      <span class="string">"country"</span>: <span class="string">"TW"</span>
+    &#125;
+  ]
+&#125;</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>部署方式</h2>
+      <h3>Vercel (Serverless)</h3>
+      <div class="code-block">
+        <div class="code-header">步驟</div>
+        <div class="code-content">
+          <code><span class="comment"># 1. 建立專案結構</span>
+/api
+  └── mst/[[...path]].js  <span class="comment"># 改名後放這</span>
+
+<span class="comment"># 2. 部署到 Vercel</span>
+vercel deploy
+
+<span class="comment"># 3. 自動變成 /api/mst/* 端點</span></code>
+        </div>
+      </div>
+      <h3>獨立運行</h3>
+      <div class="code-block">
+        <div class="code-header">Terminal</div>
+        <div class="code-content">
+          <code><span class="comment"># 需要 express</span>
+npm install express
+
+<span class="comment"># 啟動</span>
+node mst-api.js
+
+<span class="comment"># 跑在 http://localhost:3001</span></code>
+        </div>
+      </div>
+      <h3>Railway / Render</h3>
+      <div class="code-block">
+        <div class="code-header">設定</div>
+        <div class="code-content">
+          <code><span class="comment"># 啟動指令</span>
+node mst-api.js
+
+<span class="comment"># 環境變數（可選）</span>
+PORT=3001</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>前端整合</h2>
+      <p>部署完成後，前端 SDK 指向你的 API：</p>
+      <div class="code-block">
+        <div class="code-header">JavaScript</div>
+        <div class="code-content">
+          <code><span class="keyword">const</span> mst = <span class="keyword">new</span> <span class="function">MST</span>(&#123;
+  <span class="function">apiEndpoint</span>: <span class="string">'https://your-api.vercel.app/api/mst'</span>
+&#125;);
+
+mst.<span class="function">on</span>(<span class="string">'complete'</span>, (result) =&gt; &#123;
+  console.<span class="function">log</span>(result.speed.value, result.speed.unit);
+&#125;);
+
+<span class="keyword">await</span> mst.<span class="function">run</span>();</code>
+        </div>
+      </div>
+    </section>
+  </main>
+</DocLayout>
+
+<style>
+  .highlight-red {
+    color: var(--red);
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
+
+  .btn {
+    padding: 14px 32px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: #1a1a1a;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .api-section h2::before {
+    background: var(--red);
+  }
+</style>

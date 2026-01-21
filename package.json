@@ -4,6 +4,9 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
     "start": "node server.js"
   },
   "keywords": [],
@@ -11,6 +14,8 @@
   "license": "ISC",
   "description": "Speed test using FAST CDN nodes",
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
+    "astro": "^5.16.11",
     "express": "^5.2.1"
   }
 }

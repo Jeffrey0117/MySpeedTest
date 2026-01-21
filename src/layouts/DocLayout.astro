@@ -1,0 +1,305 @@
+---
+import '../styles/global.css';
+
+const { title, description, canonical, ogType = 'website', schema, activeNav } = Astro.props;
+const siteUrl = 'https://myspeedtest.isnowfriend.com';
+const ogImage = siteUrl + '/og-image.png';
+---
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+  <link rel="canonical" href={canonical}>
+
+  <meta property="og:type" content={ogType}>
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:site_name" content="MST 測速">
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:url" content={canonical}>
+  <meta property="og:image" content={ogImage}>
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={description}>
+  <meta name="twitter:image" content={ogImage}>
+
+  {schema && (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  )}
+</head>
+<body>
+  <header class="doc-header">
+    <a href="/" class="logo">
+      <div class="logo-icon"></div>
+      MST
+    </a>
+    <div class="nav-right">
+      <nav>
+        <a href="/">測速</a>
+        <a href="/learn" class={activeNav === 'learn' ? 'active' : ''}>原理</a>
+        <a href="/sdk" class={activeNav === 'sdk' ? 'active' : ''}>SDK</a>
+        <a href="/api" class={activeNav === 'api' ? 'active' : ''}>API</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" title="切換深淺模式">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <slot />
+
+  <footer>
+    <p>
+      <a href="/">測速</a>
+      <a href="/learn">測速原理</a>
+      <a href="/sdk">開發者 SDK</a>
+      <a href="#">GitHub</a>
+    </p>
+    <p style="margin-top: 15px;">&copy; 2025 MySpeedTest</p>
+  </footer>
+
+  <script is:inline>
+    function toggleTheme() {
+      var html = document.documentElement;
+      var icon = document.getElementById('themeIcon');
+      var isDark = html.getAttribute('data-theme') === 'dark';
+
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        if (icon) icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        if (icon) icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    var saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var icon = document.getElementById('themeIcon');
+      if (icon) icon.textContent = '☀️';
+    }
+
+    var toggleBtn = document.getElementById('themeToggle');
+    if (toggleBtn) toggleBtn.addEventListener('click', toggleTheme);
+  </script>
+</body>
+</html>
+
+<style is:global>
+  .doc-header {
+    border-bottom: 1px solid var(--gray-dark);
+  }
+
+  nav a.active {
+    color: var(--white);
+  }
+
+  .hero {
+    text-align: center;
+    padding: 80px 20px 60px;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 7vw, 56px);
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .hero p {
+    font-size: 18px;
+    color: var(--gray);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .content {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  .section {
+    margin-bottom: 70px;
+  }
+
+  .section h2 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section h2::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: var(--yellow);
+    border-radius: 2px;
+  }
+
+  .section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 30px 0 15px;
+    color: var(--white);
+  }
+
+  .section p {
+    margin-bottom: 15px;
+    color: var(--gray);
+    font-size: 16px;
+  }
+
+  .section strong {
+    color: var(--white);
+  }
+
+  .section ul {
+    list-style: none;
+    margin: 20px 0;
+  }
+
+  .section ul li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 12px;
+    color: var(--gray);
+  }
+
+  .section ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    background: var(--yellow);
+    border-radius: 50%;
+  }
+
+  .code-block {
+    background: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .code-header {
+    background: #252525;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: #888;
+    border-bottom: 1px solid #333;
+  }
+
+  .code-content {
+    padding: 20px;
+    overflow-x: auto;
+  }
+
+  .code-content code {
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 13px;
+    color: #e0e0e0;
+    white-space: pre;
+    line-height: 1.6;
+  }
+
+  .comment { color: #666; }
+  .keyword { color: #82aaff; }
+  .string { color: #c3e88d; }
+  .function { color: #ffa502; }
+  .number { color: #ff4757; }
+  .highlight { color: #ffa502; }
+
+  .info-box {
+    background: var(--bg-card);
+    border-left: 3px solid var(--yellow);
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 0 12px 12px 0;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+  }
+
+  .info-box.blue {
+    border-left-color: var(--blue);
+  }
+
+  .info-box h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #ff9500;
+  }
+
+  .info-box.blue h4 {
+    color: var(--blue);
+  }
+
+  .info-box p {
+    margin-bottom: 0;
+    font-size: 15px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+
+  th, td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-dark);
+  }
+
+  th {
+    color: #ff9500;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  td {
+    color: var(--gray);
+    font-size: 15px;
+  }
+
+  td code {
+    background: rgba(0,0,0,0.1);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+    color: var(--white);
+  }
+
+  :root[data-theme=dark] td code {
+    background: rgba(255,255,255,0.1);
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 60px 20px 40px;
+    }
+
+    .section h2 {
+      font-size: 24px;
+    }
+  }
+</style>

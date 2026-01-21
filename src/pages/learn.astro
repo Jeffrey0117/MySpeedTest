@@ -1,0 +1,104 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+---
+
+<DocLayout
+  title="⚡ 測速原理 - MST 網速測試怎麼運作"
+  description="深入了解網速測試的原理：MST 如何在 5 秒內測完？為什麼測速結果會不準？Mbps 跟實際下載速度的關係。"
+  canonical="https://myspeedtest.isnowfriend.com/learn"
+  ogType="article"
+  activeNav="learn"
+>
+  <section class="hero">
+    <h1>測速<span class="highlight-yellow">原理</span></h1>
+    <p>不只告訴你速度，還解釋為什麼</p>
+  </section>
+
+  <main class="content">
+    <section class="section">
+      <h2>測速怎麼運作？</h2>
+      <p>網速測試的原理很簡單：<strong>在固定時間內，下載盡可能多的資料，然後計算速度。</strong></p>
+      <div class="code-block">
+        <div class="code-content">
+          <code><span class="comment">// 測速公式</span>
+速度 = 下載的資料量 ÷ 花費的時間
+
+<span class="comment">// 例如：2 秒內下載了 25 MB</span>
+速度 = <span class="highlight">25 MB</span> ÷ <span class="highlight">2 秒</span> = 12.5 MB/s = <span class="highlight">100 Mbps</span></code>
+        </div>
+      </div>
+      <div class="info-box">
+        <h4>MB vs Mbps</h4>
+        <p>網路速度用「bits」計算，檔案大小用「bytes」。<br>1 byte = 8 bits，所以 12.5 MB/s = 100 Mbps。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>為什麼 MST 這麼快？</h2>
+      <p>傳統觀念認為「測越久越準」，這是<strong>錯的</strong>。</p>
+      <p>測速的準確度取決於：<strong>頻寬有沒有被跑滿</strong>。如果連線已經達到最大速度，測 2 秒和測 20 秒的結果是一樣的。</p>
+      <h3>MST 的三個技術</h3>
+      <ul>
+        <li><strong>4 條連線並行</strong> — 快速吃滿頻寬，避免單一連線的瓶頸</li>
+        <li><strong>Range 請求</strong> — 跳過 TCP slow start，直接全速下載</li>
+        <li><strong>智慧驗證</strong> — 偵測到波動時自動延長，確保準確</li>
+      </ul>
+      <div class="info-box blue">
+        <h4>智慧延長機制</h4>
+        <p>MST 會在測速後檢查結果穩定性。如果變異係數 > 15%，會自動延長驗證。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>測速結果為什麼會「不準」？</h2>
+      <p>很多人發現：實際下載速度跟測速結果差很多。這是正常的：</p>
+      <h3>1. 測速用的是「最佳條件」</h3>
+      <p>測速工具選擇最近的伺服器、多條連線並行。但實際下載時，伺服器可能在國外、只有單一連線。</p>
+      <h3>2. 協定開銷</h3>
+      <p>網路傳輸不只有「資料」，還有封包標頭、確認訊號。這些開銷會佔用約 5-10% 頻寬。</p>
+      <h3>3. Wi-Fi 干擾</h3>
+      <p>無線訊號會受到牆壁、鄰居 Wi-Fi、藍牙設備的干擾。</p>
+    </section>
+
+    <section class="section">
+      <h2>Mbps 對照表</h2>
+      <table>
+        <tr>
+          <th>測速結果</th>
+          <th>理論下載</th>
+          <th>實際下載</th>
+        </tr>
+        <tr>
+          <td>50 Mbps</td>
+          <td>6.25 MB/s</td>
+          <td>5-6 MB/s</td>
+        </tr>
+        <tr>
+          <td>100 Mbps</td>
+          <td>12.5 MB/s</td>
+          <td>10-11 MB/s</td>
+        </tr>
+        <tr>
+          <td>300 Mbps</td>
+          <td>37.5 MB/s</td>
+          <td>30-35 MB/s</td>
+        </tr>
+        <tr>
+          <td>1 Gbps</td>
+          <td>125 MB/s</td>
+          <td>100-115 MB/s</td>
+        </tr>
+      </table>
+      <div class="info-box">
+        <h4>快速換算</h4>
+        <p>Mbps ÷ 10 ≈ 實際下載速度（MB/s）</p>
+      </div>
+    </section>
+  </main>
+</DocLayout>
+
+<style>
+  .highlight-yellow {
+    color: #ff9500;
+  }
+</style>

@@ -1,0 +1,453 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="⚡ MST 測速 - 最快的網速測試，不用等"
+  description="最快的免費網速測試。5 秒出結果，不用等轉圈圈。免安裝、開源，打開就能測。"
+  canonical="https://myspeedtest.isnowfriend.com/"
+>
+  <main>
+    <!-- 幾何裝飾 -->
+    <div class="geo geo-circle"></div>
+    <div class="geo geo-square"></div>
+    <div class="geo geo-triangle"></div>
+
+    <section class="hero">
+      <h1>瞬間<span class="fast">測速</span></h1>
+      <p>快到你來不及眨眼，準到你不敢相信</p>
+    </section>
+
+    <section class="speedtest">
+      <div class="speed-display">
+        <div class="speed" id="speed">0</div>
+        <div class="unit" id="unit">Mbps</div>
+      </div>
+
+      <button class="go-btn" id="goBtn">
+        <span class="label">GO</span>
+      </button>
+
+      <div class="status" id="status"></div>
+    </section>
+
+    <div class="tags">
+      <div class="tag"><span class="tag-dot red"></span>5 秒出結果</div>
+      <div class="tag"><span class="tag-dot yellow"></span>自動驗證準度</div>
+      <div class="tag"><span class="tag-dot blue"></span>開源可驗證</div>
+    </div>
+
+    <section class="explain">
+      <h2>智慧測速，快又準</h2>
+      <p>MST 會在 <strong>5 秒</strong>內給你結果，偵測到波動會自動延長確保準確。</p>
+      <p>多連線並行下載，快速吃滿頻寬，不浪費你的時間。</p>
+      <p><a href="/learn">→ 了解測速原理</a></p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  /* ===== Main ===== */
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+    position: relative;
+  }
+
+  /* 幾何裝飾 */
+  .geo {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .geo-circle {
+    width: 350px;
+    height: 350px;
+    border: 2px solid var(--yellow);
+    border-radius: 50%;
+    top: 5%;
+    left: -120px;
+    opacity: 0.4;
+  }
+
+  .geo-square {
+    width: 180px;
+    height: 180px;
+    border: 2px solid var(--blue);
+    bottom: 10%;
+    right: 3%;
+    opacity: 0.4;
+    transform: rotate(15deg);
+  }
+
+  .geo-triangle {
+    width: 0;
+    height: 0;
+    border-left: 100px solid transparent;
+    border-right: 100px solid transparent;
+    border-bottom: 170px solid var(--red);
+    opacity: 0.15;
+    top: 15%;
+    right: 12%;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 10vw, 80px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 .fast {
+    color: #ff9500;
+  }
+
+  .hero p {
+    font-size: clamp(16px, 3vw, 20px);
+    color: var(--gray);
+    font-weight: 400;
+  }
+
+  /* 測速區 */
+  .speedtest {
+    text-align: center;
+    position: relative;
+  }
+
+  .speed-display {
+    margin-bottom: 40px;
+  }
+
+  .speed {
+    font-size: clamp(100px, 25vw, 180px);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--white);
+    transition: all 0.1s ease;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .speed.active {
+    color: #ff9500;
+  }
+
+  .unit {
+    font-size: clamp(20px, 4vw, 32px);
+    color: var(--gray);
+    font-weight: 500;
+    letter-spacing: 6px;
+    margin-top: 10px;
+  }
+
+  /* GO 按鈕 */
+  .go-btn {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid var(--white);
+    background: transparent;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .go-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--white);
+    transform: scale(0);
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+
+  .go-btn:hover::before {
+    transform: scale(1);
+  }
+
+  .go-btn:hover {
+    color: var(--bg);
+  }
+
+  .go-btn .label {
+    position: relative;
+    z-index: 1;
+  }
+
+  .go-btn.running {
+    border-color: var(--yellow);
+    animation: pulse 1s ease infinite;
+  }
+
+  .go-btn.running .label {
+    font-size: 14px;
+  }
+
+  .go-btn.verifying {
+    border-color: var(--blue);
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 165, 2, 0.4); }
+    50% { box-shadow: 0 0 0 20px rgba(255, 165, 2, 0); }
+  }
+
+  .status {
+    margin-top: 30px;
+    font-size: 14px;
+    color: var(--gray);
+    min-height: 20px;
+  }
+
+  .status .verifying {
+    color: var(--blue);
+  }
+
+  /* 特色標籤 */
+  .tags {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 60px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-light);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+
+
+  .tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .tag-dot.red { background: var(--red); }
+  .tag-dot.yellow { background: var(--yellow); }
+  .tag-dot.blue { background: var(--blue); }
+
+  /* ===== 說明區 ===== */
+  .explain {
+    max-width: 700px;
+    margin: 80px auto 0;
+    padding: 0 20px;
+    text-align: center;
+  }
+
+  .explain h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--white);
+  }
+
+  .explain p {
+    font-size: 15px;
+    color: var(--gray);
+    line-height: 1.8;
+    margin-bottom: 15px;
+  }
+
+  .explain strong {
+    color: #ff9500;
+  }
+
+  .explain a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  .explain a:hover {
+    text-decoration: underline;
+  }
+
+  /* ===== 響應式 ===== */
+  @media (max-width: 768px) {
+    .go-btn {
+      width: 130px;
+      height: 130px;
+      font-size: 24px;
+    }
+
+    .geo {
+      display: none;
+    }
+
+    .tags {
+      gap: 10px;
+    }
+
+    .tag {
+      padding: 8px 15px;
+      font-size: 12px;
+    }
+  }
+</style>
+
+<script is:inline src="/sdk/mst.js"></script>
+<script is:inline>
+  var mst = null;
+  var samples = [];
+
+  async function startTest() {
+    var btn = document.getElementById('goBtn');
+    var speedEl = document.getElementById('speed');
+    var unitEl = document.getElementById('unit');
+    var statusEl = document.getElementById('status');
+
+    if (!btn || !speedEl || !unitEl || !statusEl) return;
+
+    if (mst && mst.isRunning) {
+      mst.stop();
+      return;
+    }
+
+    samples = [];
+    var firstResult = null;
+
+    mst = new MST({
+      duration: 1500,
+      maxConnections: 4,
+      updateInterval: 50,
+    });
+
+    btn.classList.add('running');
+    var label = btn.querySelector('.label');
+    if (label) label.textContent = 'STOP';
+    speedEl.classList.add('active');
+    speedEl.textContent = '0';
+
+    mst
+      .on('start', function() {
+        statusEl.textContent = '連接中...';
+      })
+      .on('targets', function() {
+        statusEl.textContent = '';
+      })
+      .on('progress', function(data) {
+        speedEl.textContent = data.speed.value;
+        unitEl.textContent = data.speed.unit;
+        samples.push(data.speed.raw);
+      })
+      .on('complete', async function(result) {
+        firstResult = result;
+        speedEl.textContent = result.speed.value;
+        unitEl.textContent = result.speed.unit;
+
+        var recentSamples = samples.slice(-10);
+        var avg = recentSamples.reduce(function(a, b) { return a + b; }, 0) / recentSamples.length;
+        var variance = recentSamples.reduce(function(sum, val) { return sum + Math.pow(val - avg, 2); }, 0) / recentSamples.length;
+        var cv = Math.sqrt(variance) / avg;
+
+        if (cv > 0.15) {
+          statusEl.innerHTML = '<span class="verifying">驗證中...</span>';
+          btn.classList.remove('running');
+          btn.classList.add('verifying');
+          await runVerification(speedEl, unitEl, statusEl, btn, result);
+        } else {
+          statusEl.textContent = (result.bytes / 1024 / 1024).toFixed(1) + ' MB';
+          resetButton();
+          reportResult(result);
+        }
+      })
+      .on('error', function(data) {
+        statusEl.textContent = data.message;
+        resetButton();
+      });
+
+    try {
+      await mst.run();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function runVerification(speedEl, unitEl, statusEl, btn, firstResult) {
+    mst = new MST({
+      duration: 2000,
+      maxConnections: 4,
+      updateInterval: 50,
+    });
+
+    mst
+      .on('progress', function(data) {
+        speedEl.textContent = data.speed.value;
+        unitEl.textContent = data.speed.unit;
+      })
+      .on('complete', function(result) {
+        var avgSpeed = (firstResult.speed.raw + result.speed.raw) / 2;
+        var formatted = MST.formatSpeed(avgSpeed);
+
+        speedEl.textContent = formatted.value;
+        unitEl.textContent = formatted.unit;
+        statusEl.textContent = '已驗證 · ' + ((firstResult.bytes + result.bytes) / 1024 / 1024).toFixed(1) + ' MB';
+
+        resetButton();
+        reportResult({
+          speed: formatted,
+          bytes: firstResult.bytes + result.bytes,
+          duration: firstResult.duration + result.duration,
+        });
+      });
+
+    try {
+      await mst.run();
+    } catch (e) {
+      console.error(e);
+      resetButton();
+    }
+  }
+
+  function resetButton() {
+    var btn = document.getElementById('goBtn');
+    if (btn) {
+      btn.classList.remove('running', 'verifying');
+      var label = btn.querySelector('.label');
+      if (label) label.textContent = 'GO';
+    }
+    var speedEl = document.getElementById('speed');
+    if (speedEl) speedEl.classList.remove('active');
+  }
+
+  async function reportResult(result) {
+    try {
+      await fetch('/api/mst/results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          speed: result.speed,
+          bytes: result.bytes,
+          duration: result.duration,
+        }),
+      });
+    } catch (e) {}
+  }
+
+  document.getElementById('goBtn').addEventListener('click', startTest);
+  fetch('/api/mst/targets').catch(function() {});
+</script>

@@ -21,10 +21,8 @@ const CONFIG = {
 const app = express();
 app.use(express.json());
 
-// 靜態檔案
-app.use(express.static(__dirname));
-app.use("/sdk", express.static(`${__dirname}/sdk`));
-app.use("/api", express.static(`${__dirname}/api`));
+// 靜態檔案（Astro build 結果）
+app.use(express.static(`${__dirname}/dist`));
 
 // CORS
 app.use((req, res, next) => {
@@ -34,13 +32,6 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
-
-// ============================================================
-// Page Routes
-// ============================================================
-app.get("/learn", (req, res) => res.sendFile(`${__dirname}/learn.html`));
-app.get("/sdk", (req, res) => res.sendFile(`${__dirname}/sdk.html`));
-app.get("/api", (req, res) => res.sendFile(`${__dirname}/api.html`));
 
 // ============================================================
 // API Routes: /api/mst
