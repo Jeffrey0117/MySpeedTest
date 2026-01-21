@@ -1,0 +1,109 @@
+---
+import { getCollection } from 'astro:content';
+import DocLayout from '../../layouts/DocLayout.astro';
+
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<DocLayout
+  title="部落格 - MST 測速"
+  description="探索網速測試的原理、工具比較與實用技巧，幫助你了解並優化網路連線品質。"
+  canonical="https://myspeedtest.isnowfriend.com/blog"
+  activeNav="blog"
+>
+  <div class="hero">
+    <h1>部落格</h1>
+    <p>網速測試知識、工具比較與實用技巧</p>
+  </div>
+
+  <div class="content">
+    <div class="posts-grid">
+      {sortedPosts.map((post) => (
+        <a href={`/blog/${post.slug}`} class="post-card">
+          <div class="post-date">
+            {post.data.date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.description}</p>
+          {post.data.tags && (
+            <div class="post-tags">
+              {post.data.tags.slice(0, 3).map((tag) => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+        </a>
+      ))}
+    </div>
+  </div>
+</DocLayout>
+
+<style>
+  .posts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .post-card {
+    display: block;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 30px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--gray-dark);
+  }
+
+  .post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    border-color: var(--yellow);
+  }
+
+  .post-date {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 12px;
+  }
+
+  .post-card h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .post-card p {
+    font-size: 15px;
+    color: var(--gray);
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: var(--bg-light);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  @media (max-width: 768px) {
+    .post-card {
+      padding: 20px;
+    }
+
+    .post-card h2 {
+      font-size: 18px;
+    }
+  }
+</style>
