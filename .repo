@@ -1,0 +1,65 @@
+{
+  "repo": 1,
+  "name": "myspeedtest",
+  "what": "Speed test using FAST CDN nodes",
+  "kind": "service",
+  "work": {
+    "guide": "CLAUDE.md",
+    "run": "npm run dev",
+    "build": "npm run build",
+    "deploy": "git push"
+  },
+  "offers": [
+    {
+      "id": "get_targets",
+      "what": "Get available speed test server nodes",
+      "how": "http",
+      "http": {
+        "method": "GET",
+        "path": "/api/mst/targets",
+        "params": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "number",
+              "description": "Number of targets (default: 3, max: 5)"
+            },
+            "country": {
+              "type": "string",
+              "description": "Country code filter (default: TW)"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "save_result",
+      "what": "Save a speed test result",
+      "how": "http",
+      "http": {
+        "method": "POST",
+        "path": "/api/mst/results",
+        "params": {
+          "type": "object",
+          "properties": {
+            "speed": {
+              "type": "object",
+              "description": "Speed data with raw value"
+            },
+            "bytes": {
+              "type": "number",
+              "description": "Total bytes transferred"
+            },
+            "duration": {
+              "type": "number",
+              "description": "Test duration in ms"
+            }
+          },
+          "required": [
+            "speed"
+          ]
+        }
+      }
+    }
+  ]
+}
