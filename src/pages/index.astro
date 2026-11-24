@@ -1,38 +1,102 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { brand, brandSameAs } from '../data/brand';
+
+// 讀 astro.config.mjs 的 `site`，不要在這裡再寫死一次網址
+const SITE = Astro.site ? Astro.site.href.replace(/\/$/, '') : '';
+
+const latestPosts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 6);
+
+/**
+ * 常見問題 — 同時餵給畫面與 FAQPage schema，所以只能寫一份。
+ * Google 要求 FAQ 結構化資料的內容必須在頁面上看得到，兩邊不一致會被判違規。
+ */
+const faqs = [
+  {
+    q: '網速要多少 Mbps 才夠用？',
+    a: '一般網頁和社群 10 Mbps 就夠，1080p 串流約 5 Mbps、4K 約 25 Mbps。一家四口同時看影片加視訊，100 Mbps 綽綽有餘。單看數字沒意義，要看同時間有幾個人、在做什麼。',
+  },
+  {
+    q: '為什麼測出來的速度比方案標示的慢很多？',
+    a: '業者標的是「最高可達」的線路速度，而且單位是 Mbps（位元），檔案下載顯示的是 MB/s（位元組），兩者差 8 倍。300M 的方案實際下載檔案約 37 MB/s 就算正常。另外 Wi-Fi、老舊路由器、同時上網的裝置都會吃掉一大段。',
+  },
+  {
+    q: '用 Wi-Fi 測跟用網路線測差多少？',
+    a: '差很多。Wi-Fi 5 實際常落在標示的三到五成，牆壁、距離、鄰居的訊號干擾都會扣分；網路線幾乎不打折。想知道線路本身有沒有問題，請插網路線測；想知道房間裡的實際體驗，就用平常的位置測 Wi-Fi。',
+  },
+  {
+    q: 'Ping（延遲）多少才適合打遊戲？',
+    a: '20 ms 以下很好，50 ms 以內多數連線對戰都順，超過 100 ms 就會感覺到操作延遲。射擊和格鬥類對延遲最敏感，回合制幾乎無感。延遲高低跟頻寬大小沒有直接關係，換更貴的方案通常救不了。',
+  },
+  {
+    q: '為什麼晚上七點到十一點網路特別慢？',
+    a: '那是尖峰時段，同一條社區線路上的鄰居都在用。台灣的家用網路多半是共享頻寬，分母變大每個人就變慢。如果白天測正常、晚上掉一半以上，問題通常在業者端而不是你家設備。',
+  },
+  {
+    q: '下載速度和上傳速度差很多正常嗎？',
+    a: '非對稱式網路（ADSL、Cable、多數光纖方案）本來就是下載快、上傳慢，差到十倍以上都算正常設計。但如果你要直播、上傳影片或遠端備份，上傳速度才是瓶頸，挑方案時要特別看。',
+  },
+  {
+    q: 'MST 測速準嗎？跟 Speedtest、fast.com 有什麼不同？',
+    a: 'MST 用多條連線同時下載來吃滿頻寬，5 秒內出結果；偵測到數值波動超過門檻會自動再測一輪並取平均，而不是直接給你一個不穩的數字。整套程式碼開源可以自己驗證，不會為了好看而美化數據。',
+  },
+  {
+    q: '測一次會用掉多少流量？',
+    a: '通常在 10 到 60 MB 之間，速度越快下載的資料量越多。測完畫面下方會顯示這次實際用掉的 MB 數。用行動網路測之前請先確認你的流量額度。',
+  },
+];
 
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "MST 測速",
-  "url": "https://myspeedtest.isnowfriend.com",
-  "description": "最快的免費網速測試工具，5 秒出結果，測試下載速度、上傳速度、延遲和抖動。",
+  "url": SITE,
+  "description": "免費線上網速測試工具，5 秒出結果，測量下載速度、延遲（Ping）與抖動。",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "Any",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "TWD"
   },
-  "featureList": ["下載速度測試", "上傳速度測試", "延遲測試", "抖動測試", "免安裝", "開源"],
-  "screenshot": "https://myspeedtest.isnowfriend.com/og-image.jpg"
+  "featureList": ["下載速度測試", "延遲測試", "抖動測試", "自動驗證準確度", "免安裝", "開源", "可嵌入的 SDK"],
+  "screenshot": SITE + "/og-image.jpg",
+  "publisher": { "@id": SITE + "/#org" }
 };
 
 const orgSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "MST 測速",
-  "url": "https://myspeedtest.isnowfriend.com",
-  "logo": "https://myspeedtest.isnowfriend.com/og-image.jpg",
-  "sameAs": []
+  "@id": SITE + "/#org",
+  "name": brand.name,
+  "alternateName": brand.shortName,
+  "description": brand.tagline,
+  "url": brand.home,
+  "logo": SITE + "/og-image.jpg",
+  "sameAs": brandSameAs
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((item) => ({
+    "@type": "Question",
+    "name": item.q,
+    "acceptedAnswer": { "@type": "Answer", "text": item.a }
+  }))
 };
 ---
 
 <BaseLayout
-  title="⚡ MST 測速 - 最快的網速測試，不用等"
-  description="最快的免費網速測試。5 秒出結果，不用等轉圈圈。免安裝、開源，打開就能測。"
+  title="網速測試 | 5 秒測出下載速度、Ping 與抖動 - MST 測速"
+  description="免費線上網速測試，5 秒出結果。測量下載速度、延遲（Ping）與抖動，偵測到波動會自動延長驗證。免安裝、開源，手機與電腦都能測。"
   canonical="https://myspeedtest.isnowfriend.com/"
-  schema={[webAppSchema, orgSchema]}
+  schema={[webAppSchema, orgSchema, faqSchema]}
 >
   <main>
     <!-- 幾何裝飾 -->
@@ -42,7 +106,8 @@ const orgSchema = {
 
     <section class="hero">
       <h1>瞬間<span class="fast">測速</span></h1>
-      <p>快到你來不及眨眼，準到你不敢相信</p>
+      <p class="hero-sub">免費線上<strong>網速測試</strong>，5 秒測出下載速度、延遲與抖動</p>
+      <p class="hero-kicker">快到你來不及眨眼，準到你不敢相信</p>
     </section>
 
     <section class="speedtest">
@@ -69,6 +134,34 @@ const orgSchema = {
       <p>MST 會在 <strong>5 秒</strong>內給你結果，偵測到波動會自動延長確保準確。</p>
       <p>多連線並行下載，快速吃滿頻寬，不浪費你的時間。</p>
       <p><a href="/learn">→ 了解測速原理</a></p>
+    </section>
+
+    <section class="faq">
+      <h2>網速測試常見問題</h2>
+      <div class="faq-list">
+        {faqs.map((item) => (
+          <details class="faq-item">
+            <summary><h3>{item.q}</h3></summary>
+            <p>{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="latest">
+      <h2>想知道更多？</h2>
+      <p class="latest-intro">我們把測速背後的原理、網路為什麼會慢、怎麼自己排查，都寫成了文章。</p>
+      <ul class="latest-list">
+        {latestPosts.map((post) => (
+          <li>
+            <a href={`/blog/${post.slug}`}>
+              <span class="latest-title">{post.data.title}</span>
+              <span class="latest-desc">{post.data.description}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="latest-more"><a href="/blog">→ 看全部文章</a></p>
     </section>
   </main>
 </BaseLayout>
@@ -143,6 +236,17 @@ const orgSchema = {
     font-size: clamp(16px, 3vw, 20px);
     color: var(--gray);
     font-weight: 400;
+  }
+
+  .hero-sub strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .hero-kicker {
+    margin-top: 10px;
+    font-size: clamp(13px, 2.4vw, 15px) !important;
+    opacity: 0.7;
   }
 
   /* 測速區 */
@@ -313,6 +417,149 @@ const orgSchema = {
     text-decoration: underline;
   }
 
+  /* ===== 常見問題 ===== */
+  .faq {
+    width: 100%;
+    max-width: 760px;
+    margin: 90px auto 0;
+    padding: 0 20px;
+  }
+
+  .faq h2,
+  .latest h2 {
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .faq-item {
+    background: var(--bg-card);
+    border: 1px solid var(--gray-dark);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 22px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::after {
+    content: '+';
+    flex-shrink: 0;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--yellow);
+    transition: transform 0.2s;
+  }
+
+  .faq-item[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .faq-item summary h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+  }
+
+  .faq-item > p {
+    margin: 0;
+    padding: 0 22px 20px;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--gray);
+  }
+
+  /* ===== 最新文章 ===== */
+  .latest {
+    width: 100%;
+    max-width: 760px;
+    margin: 90px auto 0;
+    padding: 0 20px;
+  }
+
+  .latest-intro {
+    margin: -14px 0 28px;
+    font-size: 15px;
+    color: var(--gray);
+    text-align: center;
+  }
+
+  .latest-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .latest-list a {
+    display: block;
+    height: 100%;
+    padding: 18px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--gray-dark);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .latest-list a:hover {
+    border-color: var(--yellow);
+    transform: translateY(-2px);
+  }
+
+  .latest-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.5;
+  }
+
+  .latest-desc {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--gray);
+  }
+
+  .latest-more {
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  .latest-more a {
+    color: var(--blue);
+    font-size: 15px;
+    text-decoration: none;
+  }
+
+  .latest-more a:hover {
+    text-decoration: underline;
+  }
+
   /* ===== 響應式 ===== */
   @media (max-width: 768px) {
     .go-btn {
@@ -332,6 +579,28 @@ const orgSchema = {
     .tag {
       padding: 8px 15px;
       font-size: 12px;
+    }
+
+    .faq,
+    .latest {
+      margin-top: 70px;
+    }
+
+    .faq-item summary {
+      padding: 15px 18px;
+    }
+
+    .faq-item summary h3 {
+      font-size: 15px;
+    }
+
+    .faq-item > p {
+      padding: 0 18px 18px;
+      font-size: 14px;
+    }
+
+    .latest-list {
+      grid-template-columns: 1fr;
     }
   }
 </style>

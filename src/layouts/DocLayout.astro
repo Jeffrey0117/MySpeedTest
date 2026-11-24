@@ -1,7 +1,8 @@
 ---
 import '../styles/global.css';
+import BrandFooter from '../components/BrandFooter.astro';
 
-const { title, description, canonical, ogType = 'website', schema, activeNav } = Astro.props;
+const { title, description, canonical, ogType = 'website', schema, activeNav, noindex = false } = Astro.props;
 const siteUrl = 'https://myspeedtest.isnowfriend.com';
 const ogImage = siteUrl + '/og-image.jpg';
 ---
@@ -16,6 +17,7 @@ const ogImage = siteUrl + '/og-image.jpg';
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
   <link rel="canonical" href={canonical}>
+  {noindex && <meta name="robots" content="noindex, follow">}
 
   <meta property="og:type" content={ogType}>
   <meta property="og:locale" content="zh_TW">
@@ -62,15 +64,7 @@ const ogImage = siteUrl + '/og-image.jpg';
 
   <slot />
 
-  <footer>
-    <p>
-      <a href="/">測速</a>
-      <a href="/learn">測速原理</a>
-      <a href="/sdk">開發者 SDK</a>
-      <a href="/blog">部落格</a>
-    </p>
-    <p style="margin-top: 15px;">&copy; 2025 MySpeedTest</p>
-  </footer>
+  <BrandFooter />
 
   <script is:inline>
     function toggleTheme() {

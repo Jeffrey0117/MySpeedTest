@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import DocLayout from '../../layouts/DocLayout.astro';
+import { brand, brandSameAs } from '../../data/brand';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -41,14 +42,19 @@ const articleSchema = {
   "@type": "Article",
   "headline": post.data.title,
   "description": post.data.description,
+  "inLanguage": "zh-TW",
   "datePublished": post.data.date.toISOString(),
+  "dateModified": (post.data.updated ?? post.data.date).toISOString(),
   "author": {
-    "@type": "Organization",
-    "name": "MST 測速"
+    "@type": "Person",
+    "name": brand.shortName,
+    "url": brand.home
   },
   "publisher": {
     "@type": "Organization",
-    "name": "MST 測速",
+    "name": brand.name,
+    "url": brand.home,
+    "sameAs": brandSameAs,
     "logo": {
       "@type": "ImageObject",
       "url": "https://myspeedtest.isnowfriend.com/og-image.jpg"
