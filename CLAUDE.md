@@ -21,14 +21,36 @@ npm start         # Express production server
 ## Key Files
 
 ```
-server.js                — Express server (serves built Astro + API)
-src/pages/index.astro    — Homepage (speed test UI)
-src/pages/api.astro      — API docs page
-src/pages/sdk.astro      — SDK docs page
-src/content/blog/*.md    — Blog posts (15+ articles)
-api/mst-api.js           — Standalone API (Vercel-compatible)
-sdk/mst.js               — Browser SDK for speed testing
+server.js                      — Express server (serves built Astro + API)
+src/pages/index.astro          — Homepage (speed test UI + FAQ + latest posts)
+src/pages/api.astro            — API docs page
+src/pages/sdk.astro            — SDK docs page
+src/content/blog/*.md          — Blog posts (15+ articles)
+src/data/brand.ts              — 品牌與姊妹工具清單（footer 和 schema 的唯一來源）
+src/components/BrandFooter.astro — 品牌 footer（薄殼，邏輯在 kit 裡）
+src/lib/brand-footer-kit.cjs   — brand-footer-kit 的程式複製，勿直接改
+api/mst-api.js                 — Standalone API (Vercel-compatible)
+sdk/mst.js                     — Browser SDK for speed testing
 ```
+
+## 品牌 footer
+
+邏輯來自 [brand-footer-kit](https://github.com/Jeffrey0117/brand-footer-kit)，以**程式複製**的方式接
+（這台機器的 npm 禁止 git 來源套件，EALLOWGIT）。
+
+- 要加減工具或改品牌文案 → 改 `src/data/brand.ts`，**只改那個檔**
+- 要改 footer 的結構或行為 → 改上游 kit 再同步 `src/lib/brand-footer-kit.cjs`
+- 深淺色換皮只覆寫 `.bfk-footer` 底下的 CSS 變數，別重寫 kit 的規則
+- ⚠️ **工具連結一律指公開的專案頁**（`jeffrey0117.github.io/...`），不要填自架服務的
+  直連網址——這是 public repo
+
+## SEO 注意事項
+
+- `/blog/tags/*` 全部 `noindex, follow`，也被 `astro.config.mjs` 的 sitemap filter 排除。
+  它們是 1~3 篇的薄列表頁，曾經佔掉 sitemap 的四分之三。
+- 首頁 FAQ 的問答文字同時餵給畫面與 `FAQPage` schema，兩邊必須一致，否則 Google 判違規。
+  改文案記得兩邊是同一個陣列（`src/pages/index.astro` 的 `faqs`），不要拆開。
+- 站台網址讀 `astro.config.mjs` 的 `site`（`Astro.site`），不要在頁面裡再寫死一次。
 
 ## API
 
@@ -54,4 +76,5 @@ await mst.run();
 - Manifest: `data/manifests/myspeedtest.json` (2 tools)
 - Auth: none
 - Entry: `server.js`
-- Note: Last deploy failed — may need build fix
+- Deploy: `git push`。⚠️ lowkey-guard 會擋這個 repo 的 push——站台網址本來就寫在 20 幾個
+  檔案裡，任何 diff 的 context 行都會帶到，改程式清不掉。要 Jeff 手動推或調整 allowRepos。
