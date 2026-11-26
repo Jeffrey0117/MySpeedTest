@@ -32,6 +32,7 @@ src/lib/brand-footer-kit.cjs   — brand-footer-kit 的程式複製，勿直接�
 api/mst-api.js                 — Standalone API (Vercel-compatible)
 public/sdk/mst.js              — Browser SDK for speed testing
 public/js/home-test.js         — 首頁測速流程（進頁面先測、按 GO 亮結果、確認視窗）
+public/js/result-card.js       — 把測速結果畫成可存、可分享的圖
 ```
 
 ## 品牌 footer
@@ -52,6 +53,18 @@ public/js/home-test.js         — 首頁測速流程（進頁面先測、按 GO
 - 首頁 FAQ 的問答文字同時餵給畫面與 `FAQPage` schema，兩邊必須一致，否則 Google 判違規。
   改文案記得兩邊是同一個陣列（`src/pages/index.astro` 的 `faqs`），不要拆開。
 - 站台網址讀 `astro.config.mjs` 的 `site`（`Astro.site`），不要在頁面裡再寫死一次。
+
+## 首頁測速：進頁面就先測
+
+- 頁面載完就在背景跑完整測速，按 GO 只是把結果亮出來（數字滾上去 + 確認視窗）。
+  還在測就接著顯示進度；結果超過 60 秒或已經看過，按 GO 才是現場重測。
+- 每個訪客都會被自動下載一次（約 1.5 秒滿速的量），這是 Jeff 明說要的，別加「行動網路不測」。
+- 重測之後確認視窗改報「測了幾次、平均、誤差」（只算這次開頁面、完整測完的）；
+  誤差 10% 內吐槽「就跟你說了很準」。
+- 視窗的「存成圖片」由 `public/js/result-card.js` 畫 1080×1080 的圖：手機走系統分享、電腦直接下載。
+  圖上的網址讀 `location.host`，不要寫死。
+- 第一屏要看得到 GO：首頁標題、數字、按鈕的大小都同時看 vh，改大小別只看 vw。
+- 改 `public/js/*.js` 要同時改 `index.astro` 裡 script 的 `?v=`，不然瀏覽器拿舊檔。
 
 ## API
 
