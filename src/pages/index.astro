@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
-import { brand, brandSameAs } from '../data/brand';
+import { brand, brandSameAs, desktopApps } from '../data/brand';
 
 // 讀 astro.config.mjs 的 `site`，不要在這裡再寫死一次網址
 const SITE = Astro.site ? Astro.site.href.replace(/\/$/, '') : '';
@@ -168,6 +168,15 @@ const faqSchema = {
         <div class="sure-speed"><span data-sure-speed>0</span><span class="sure-unit" data-sure-unit>Mbps</span></div>
         <h2 id="sureTitle" data-sure-title>100% 正確，別懷疑。</h2>
         <p data-sure-detail></p>
+        <div class="sure-more" data-sure-more hidden>
+          <div class="sure-more-head">這麼愛玩，再給你三個玩具<span>Windows 下載</span></div>
+          {desktopApps.map((app) => (
+            <a href={app.url} target="_blank" rel="noopener">
+              <strong>{app.name}</strong>
+              <span>{app.blurb}</span>
+            </a>
+          ))}
+        </div>
         <div class="sure-actions">
           <button type="button" class="sure-save" data-sure-save>存成圖片</button>
           <button type="button" class="sure-ok" data-sure-ok>好啦</button>
@@ -669,6 +678,65 @@ const faqSchema = {
     color: var(--gray);
   }
 
+  .sure-card {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+  }
+
+  .sure-more {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--gray-dark);
+    text-align: left;
+  }
+
+  .sure-more-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .sure-more-head span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray);
+    white-space: nowrap;
+  }
+
+  .sure-more a {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 9px 0;
+    text-decoration: none;
+    color: var(--white);
+  }
+
+  .sure-more a + a {
+    border-top: 1px solid var(--gray-dark);
+  }
+
+  .sure-more a strong {
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .sure-more a span {
+    font-size: 13px;
+    color: var(--gray);
+    text-align: right;
+  }
+
+  .sure-more a:hover strong {
+    color: var(--red);
+  }
+
   .sure-actions {
     display: flex;
     justify-content: center;
@@ -708,4 +776,4 @@ const faqSchema = {
 
 <script is:inline src="/sdk/mst.js"></script>
 <script is:inline src="/js/result-card.js?v=card1"></script>
-<script is:inline src="/js/home-test.js?v=headstart2"></script>
+<script is:inline src="/js/home-test.js?v=headstart3"></script>

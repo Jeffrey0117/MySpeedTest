@@ -61,6 +61,8 @@ public/js/result-card.js       — 把測速結果畫成可存、可分享的圖
 - 每個訪客都會被自動下載一次（約 1.5 秒滿速的量），這是 Jeff 明說要的，別加「行動網路不測」。
 - 重測之後確認視窗改報「測了幾次、平均、誤差」（只算這次開頁面、完整測完的）；
   誤差 10% 內吐槽「就跟你說了很準」。
+- 吐槽句在 `home-test.js` 的 `STEADY_LINES`（誤差小）和 `DRIFT_LINES`（誤差大），照次數輪，要加句子加在那裡。
+- 連測第 3 次起，視窗多一塊推 Windows 桌面程式（聲聲慢、DuckShot、ReVid），清單在 `src/data/brand.ts` 的 `desktopApps`。
 - 視窗的「存成圖片」由 `public/js/result-card.js` 畫 1080×1080 的圖：手機走系統分享、電腦直接下載。
   圖上的網址讀 `location.host`，不要寫死。
 - 第一屏要看得到 GO：首頁標題、數字、按鈕的大小都同時看 vh，改大小別只看 vw。

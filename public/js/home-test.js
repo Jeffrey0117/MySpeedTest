@@ -15,6 +15,24 @@
   var WOBBLE_LIMIT = 0.15;
   var ROLL_MS = 300;
   var STEADY_PERCENT = 10;
+  var MORE_FROM_TEST = 3;   // 連測到第幾次開始推其他作品
+
+  // 重測之後的吐槽，照測的次數輪。誤差小用這組：
+  var STEADY_LINES = [
+    '就跟你說了很準。',
+    '還測？答案不會變。',
+    '測幾次都一樣啦。',
+    '你是不是很閒？',
+    '再測也不會變快。',
+    '夠了，它就是這個速度。',
+  ];
+  // 誤差大用這組：
+  var DRIFT_LINES = [
+    '是你的網路在飄。',
+    '不是我不準，是它不穩。',
+    '你的網路自己都不確定。',
+    '每次都不一樣，去問你的電信。',
+  ];
 
   var btn = document.getElementById('goBtn');
   var speedEl = document.getElementById('speed');
@@ -181,10 +199,11 @@
     var spread = avg ? Math.round((gap / avg) * 100) : 0;
     var avgSpeed = MST.formatSpeed(avg);
     var head = '你已經測了 ' + history.length + ' 次，平均 ' + avgSpeed.value + ' ' + avgSpeed.unit + '，';
+    var turn = history.length - 2;
     if (spread <= STEADY_PERCENT) {
-      return { title: '就跟你說了很準。', detail: head + '誤差只有 ' + spread + '%。還要測幾次才甘願？' };
+      return { title: STEADY_LINES[turn % STEADY_LINES.length], detail: head + '誤差只有 ' + spread + '%。' };
     }
-    return { title: '是你的網路在飄。', detail: head + '誤差 ' + spread + '%。我每次都量得準，是它每次都不一樣。' };
+    return { title: DRIFT_LINES[turn % DRIFT_LINES.length], detail: head + '誤差 ' + spread + '%。' };
   }
 
   function openSure(result, megabytes) {
@@ -201,6 +220,8 @@
     sureEl.querySelector('[data-sure-unit]').textContent = result.speed.unit;
     sureEl.querySelector('[data-sure-title]').textContent = words.title;
     sureEl.querySelector('[data-sure-detail]').textContent = words.detail;
+    var moreEl = sureEl.querySelector('[data-sure-more]');
+    if (moreEl) moreEl.hidden = history.length < MORE_FROM_TEST;
     sureEl.hidden = false;
     var ok = sureEl.querySelector('[data-sure-ok]');
     if (ok) ok.focus();

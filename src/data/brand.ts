@@ -32,6 +32,30 @@ export const brand = {
 export const brandSameAs: string[] = [brand.github, brand.home];
 
 /**
+ * 首頁測速確認視窗裡推的桌面程式（Windows 下載）。
+ * 訪客連測三次以上才會看到 —— 這麼愛玩，就給他別的玩。
+ * 網頁上能直接玩的工具之後另外整理，先不放進來。
+ * 一樣只連公開的專案頁。
+ */
+export const desktopApps: BrandTool[] = [
+  {
+    name: '聲聲慢',
+    blurb: '用講的打字，本機中文語音輸入',
+    url: 'https://jeffrey0117.github.io/SpeakSlow/',
+  },
+  {
+    name: 'DuckShot',
+    blurb: '截圖加文字辨識',
+    url: 'https://jeffrey0117.github.io/jeffrey-apps/work/DuckShot/',
+  },
+  {
+    name: 'ReVid',
+    blurb: '看片學語言的播放器',
+    url: 'https://jeffrey0117.github.io/ReVid/',
+  },
+];
+
+/**
  * footer 精選的姊妹工具。
  *
  * 刻意只放 6 個：每頁外連太多會稀釋權重，也會讓 footer 比內容還長。
