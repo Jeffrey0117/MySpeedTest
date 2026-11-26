@@ -30,7 +30,8 @@ src/data/brand.ts              — 品牌與姊妹工具清單（footer 和 sche
 src/components/BrandFooter.astro — 品牌 footer（薄殼，邏輯在 kit 裡）
 src/lib/brand-footer-kit.cjs   — brand-footer-kit 的程式複製，勿直接改
 api/mst-api.js                 — Standalone API (Vercel-compatible)
-sdk/mst.js                     — Browser SDK for speed testing
+public/sdk/mst.js              — Browser SDK for speed testing
+public/js/home-test.js         — 首頁測速流程（進頁面先測、按 GO 亮結果、確認視窗）
 ```
 
 ## 品牌 footer

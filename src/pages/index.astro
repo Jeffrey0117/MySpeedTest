@@ -163,6 +163,14 @@ const faqSchema = {
       </ul>
       <p class="latest-more"><a href="/blog">→ 看全部文章</a></p>
     </section>
+    <div class="sure" id="sure" role="dialog" aria-modal="true" aria-labelledby="sureTitle" hidden>
+      <div class="sure-card">
+        <div class="sure-speed"><span data-sure-speed>0</span><span class="sure-unit" data-sure-unit>Mbps</span></div>
+        <h2 id="sureTitle">100% 正確，別懷疑。</h2>
+        <p>實際下載 <span data-sure-bytes>0 MB</span> 量出來的。不信就再按一次 GO。</p>
+        <button type="button" class="sure-ok" data-sure-ok>好啦</button>
+      </div>
+    </div>
   </main>
 </BaseLayout>
 
@@ -603,147 +611,78 @@ const faqSchema = {
       grid-template-columns: 1fr;
     }
   }
+
+  /* 結果確認視窗 */
+  .sure {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.55);
+    animation: sure-in 0.15s ease;
+  }
+
+  .sure[hidden] {
+    display: none;
+  }
+
+  .sure-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 36px 28px 28px;
+    border: 3px solid var(--white);
+    border-radius: 16px;
+    background: var(--bg-card);
+    text-align: center;
+  }
+
+  .sure-speed {
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--red);
+  }
+
+  .sure-unit {
+    margin-left: 8px;
+    font-size: 20px;
+    color: var(--gray);
+  }
+
+  .sure-card h2 {
+    margin: 22px 0 10px;
+    font-size: 24px;
+    color: var(--white);
+  }
+
+  .sure-card p {
+    text-wrap: balance;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray);
+  }
+
+  .sure-ok {
+    margin-top: 24px;
+    padding: 12px 40px;
+    border: none;
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--bg);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  @keyframes sure-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 </style>
 
 <script is:inline src="/sdk/mst.js"></script>
-<script is:inline>
-  var mst = null;
-  var samples = [];
-
-  async function startTest() {
-    var btn = document.getElementById('goBtn');
-    var speedEl = document.getElementById('speed');
-    var unitEl = document.getElementById('unit');
-    var statusEl = document.getElementById('status');
-
-    if (!btn || !speedEl || !unitEl || !statusEl) return;
-
-    if (mst && mst.isRunning) {
-      mst.stop();
-      return;
-    }
-
-    samples = [];
-    var firstResult = null;
-
-    mst = new MST({
-      duration: 1500,
-      maxConnections: 4,
-      updateInterval: 50,
-    });
-
-    btn.classList.add('running');
-    var label = btn.querySelector('.label');
-    if (label) label.textContent = 'STOP';
-    speedEl.classList.add('active');
-    speedEl.textContent = '0';
-
-    mst
-      .on('start', function() {
-        statusEl.textContent = '連接中...';
-      })
-      .on('targets', function() {
-        statusEl.textContent = '';
-      })
-      .on('progress', function(data) {
-        speedEl.textContent = data.speed.value;
-        unitEl.textContent = data.speed.unit;
-        samples.push(data.speed.raw);
-      })
-      .on('complete', async function(result) {
-        firstResult = result;
-        speedEl.textContent = result.speed.value;
-        unitEl.textContent = result.speed.unit;
-
-        var recentSamples = samples.slice(-10);
-        var avg = recentSamples.reduce(function(a, b) { return a + b; }, 0) / recentSamples.length;
-        var variance = recentSamples.reduce(function(sum, val) { return sum + Math.pow(val - avg, 2); }, 0) / recentSamples.length;
-        var cv = Math.sqrt(variance) / avg;
-
-        if (cv > 0.15) {
-          statusEl.innerHTML = '<span class="verifying">驗證中...</span>';
-          btn.classList.remove('running');
-          btn.classList.add('verifying');
-          await runVerification(speedEl, unitEl, statusEl, btn, result);
-        } else {
-          statusEl.textContent = (result.bytes / 1024 / 1024).toFixed(1) + ' MB';
-          resetButton();
-          reportResult(result);
-        }
-      })
-      .on('error', function(data) {
-        statusEl.textContent = data.message;
-        resetButton();
-      });
-
-    try {
-      await mst.run();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async function runVerification(speedEl, unitEl, statusEl, btn, firstResult) {
-    mst = new MST({
-      duration: 2000,
-      maxConnections: 4,
-      updateInterval: 50,
-    });
-
-    mst
-      .on('progress', function(data) {
-        speedEl.textContent = data.speed.value;
-        unitEl.textContent = data.speed.unit;
-      })
-      .on('complete', function(result) {
-        var avgSpeed = (firstResult.speed.raw + result.speed.raw) / 2;
-        var formatted = MST.formatSpeed(avgSpeed);
-
-        speedEl.textContent = formatted.value;
-        unitEl.textContent = formatted.unit;
-        statusEl.textContent = '已驗證 · ' + ((firstResult.bytes + result.bytes) / 1024 / 1024).toFixed(1) + ' MB';
-
-        resetButton();
-        reportResult({
-          speed: formatted,
-          bytes: firstResult.bytes + result.bytes,
-          duration: firstResult.duration + result.duration,
-        });
-      });
-
-    try {
-      await mst.run();
-    } catch (e) {
-      console.error(e);
-      resetButton();
-    }
-  }
-
-  function resetButton() {
-    var btn = document.getElementById('goBtn');
-    if (btn) {
-      btn.classList.remove('running', 'verifying');
-      var label = btn.querySelector('.label');
-      if (label) label.textContent = 'GO';
-    }
-    var speedEl = document.getElementById('speed');
-    if (speedEl) speedEl.classList.remove('active');
-  }
-
-  async function reportResult(result) {
-    try {
-      await fetch('/api/mst/results', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          speed: result.speed,
-          bytes: result.bytes,
-          duration: result.duration,
-        }),
-      });
-    } catch (e) {}
-  }
-
-  document.getElementById('goBtn').addEventListener('click', startTest);
-  fetch('/api/mst/targets').catch(function() {});
-</script>
+<script is:inline src="/js/home-test.js?v=headstart1"></script>
