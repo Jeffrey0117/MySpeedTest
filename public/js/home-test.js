@@ -4,6 +4,8 @@
  * - 頁面載完（而且分頁看得到）就自動開測，畫面不動
  * - 按 GO：結果已經好了 → 數字滾上去、跳出確認視窗；還在測 → 接著顯示當下進度
  * - 結果放超過 FRESH_MS 或已經看過 → 按 GO 是現場重測
+ * - 重測之後視窗改報「測了幾次、平均、誤差」，誤差在 STEADY_PERCENT 內就吐槽
+ * - 視窗裡的「存成圖片」交給 result-card.js
  * - state 只用 set() 換成新物件；每次測速有自己的 id，舊的回呼改不到新的那次
  */
 (function () {
@@ -12,6 +14,7 @@
   var VERIFY_MS = 2000;
   var WOBBLE_LIMIT = 0.15;
   var ROLL_MS = 300;
+  var STEADY_PERCENT = 10;
 
   var btn = document.getElementById('goBtn');
   var speedEl = document.getElementById('speed');
@@ -25,6 +28,8 @@
     verifying: false, mst: null, live: null, result: null, failed: null, finishedAt: 0,
   };
   var state = IDLE;
+  var history = [];     // 這次開頁面以來，每次完整測完的速度（bps）
+  var lastCard = null;  // 確認視窗目前顯示的內容，存圖用
 
   function set(id, changes) {
     if (state.id !== id) return;
@@ -149,6 +154,8 @@
     unitEl.textContent = result.speed.unit;
     statusEl.textContent = (result.verified ? '已驗證 · ' : '') + megabytes;
 
+    if (!shown.stopped) history = history.concat(result.speed.raw);
+
     function finish() {
       speedEl.textContent = result.speed.value;
       if (!shown.stopped) openSure(result, megabytes);
@@ -161,11 +168,39 @@
 
   // ── 確認視窗 ──
 
+  // 第一次：叫他別懷疑。重測之後：報次數、平均、誤差，誤差小就吐槽。
+  function verdict(megabytes) {
+    if (history.length < 2) {
+      return {
+        title: '100% 正確，別懷疑。',
+        detail: '實際下載 ' + megabytes + ' 量出來的。不信就再按一次 GO。',
+      };
+    }
+    var avg = history.reduce(function (a, b) { return a + b; }, 0) / history.length;
+    var gap = Math.max.apply(null, history) - Math.min.apply(null, history);
+    var spread = avg ? Math.round((gap / avg) * 100) : 0;
+    var avgSpeed = MST.formatSpeed(avg);
+    var head = '你已經測了 ' + history.length + ' 次，平均 ' + avgSpeed.value + ' ' + avgSpeed.unit + '，';
+    if (spread <= STEADY_PERCENT) {
+      return { title: '就跟你說了很準。', detail: head + '誤差只有 ' + spread + '%。還要測幾次才甘願？' };
+    }
+    return { title: '是你的網路在飄。', detail: head + '誤差 ' + spread + '%。我每次都量得準，是它每次都不一樣。' };
+  }
+
   function openSure(result, megabytes) {
     if (!sureEl) return;
+    var words = verdict(megabytes);
+    lastCard = {
+      value: result.speed.value,
+      unit: result.speed.unit,
+      title: words.title,
+      detail: words.detail,
+      host: location.host,
+    };
     sureEl.querySelector('[data-sure-speed]').textContent = result.speed.value;
     sureEl.querySelector('[data-sure-unit]').textContent = result.speed.unit;
-    sureEl.querySelector('[data-sure-bytes]').textContent = megabytes;
+    sureEl.querySelector('[data-sure-title]').textContent = words.title;
+    sureEl.querySelector('[data-sure-detail]').textContent = words.detail;
     sureEl.hidden = false;
     var ok = sureEl.querySelector('[data-sure-ok]');
     if (ok) ok.focus();
@@ -179,6 +214,10 @@
 
   if (sureEl) {
     sureEl.addEventListener('click', function (e) {
+      if (e.target.closest('[data-sure-save]')) {
+        if (lastCard && window.MSTResultCard) window.MSTResultCard.save(lastCard);
+        return;
+      }
       if (e.target === sureEl || e.target.closest('[data-sure-ok]')) closeSure();
     });
     document.addEventListener('keydown', function (e) {

@@ -166,9 +166,12 @@ const faqSchema = {
     <div class="sure" id="sure" role="dialog" aria-modal="true" aria-labelledby="sureTitle" hidden>
       <div class="sure-card">
         <div class="sure-speed"><span data-sure-speed>0</span><span class="sure-unit" data-sure-unit>Mbps</span></div>
-        <h2 id="sureTitle">100% 正確，別懷疑。</h2>
-        <p>實際下載 <span data-sure-bytes>0 MB</span> 量出來的。不信就再按一次 GO。</p>
-        <button type="button" class="sure-ok" data-sure-ok>好啦</button>
+        <h2 id="sureTitle" data-sure-title>100% 正確，別懷疑。</h2>
+        <p data-sure-detail></p>
+        <div class="sure-actions">
+          <button type="button" class="sure-save" data-sure-save>存成圖片</button>
+          <button type="button" class="sure-ok" data-sure-ok>好啦</button>
+        </div>
       </div>
     </div>
   </main>
@@ -182,7 +185,7 @@ const faqSchema = {
     align-items: center;
     justify-content: center;
     min-height: calc(100vh - 200px);
-    padding: 40px 20px;
+    padding: clamp(12px, 3vh, 40px) 20px 40px;
     position: relative;
   }
 
@@ -224,16 +227,17 @@ const faqSchema = {
   }
 
   /* Hero */
+  /* 第一屏要看得到 GO：字級和間距同時看視窗高度（vh），矮螢幕自動縮 */
   .hero {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: clamp(16px, 4vh, 50px);
   }
 
   .hero h1 {
-    font-size: clamp(48px, 10vw, 80px);
+    font-size: clamp(36px, min(10vw, 8vh), 80px);
     font-weight: 700;
     line-height: 1.1;
-    margin-bottom: 20px;
+    margin-bottom: clamp(8px, 2vh, 20px);
   }
 
   .hero h1 .fast {
@@ -264,11 +268,11 @@ const faqSchema = {
   }
 
   .speed-display {
-    margin-bottom: 40px;
+    margin-bottom: clamp(16px, 3.5vh, 40px);
   }
 
   .speed {
-    font-size: clamp(100px, 25vw, 180px);
+    font-size: clamp(72px, min(25vw, 20vh), 180px);
     font-weight: 300;
     line-height: 1;
     color: var(--white);
@@ -290,8 +294,8 @@ const faqSchema = {
 
   /* GO 按鈕 */
   .go-btn {
-    width: 150px;
-    height: 150px;
+    width: clamp(104px, 17vh, 150px);
+    height: clamp(104px, 17vh, 150px);
     border-radius: 50%;
     border: 3px solid var(--white);
     background: transparent;
@@ -571,8 +575,8 @@ const faqSchema = {
   /* ===== 響應式 ===== */
   @media (max-width: 768px) {
     .go-btn {
-      width: 130px;
-      height: 130px;
+      width: clamp(104px, 17vh, 130px);
+      height: clamp(104px, 17vh, 130px);
       font-size: 24px;
     }
 
@@ -665,10 +669,28 @@ const faqSchema = {
     color: var(--gray);
   }
 
-  .sure-ok {
+  .sure-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
     margin-top: 24px;
+  }
+
+  .sure-save {
+    padding: 12px 24px;
+    border: 2px solid var(--white);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .sure-ok {
     padding: 12px 40px;
-    border: none;
+    border: 2px solid var(--white);
     border-radius: 999px;
     background: var(--white);
     color: var(--bg);
@@ -685,4 +707,5 @@ const faqSchema = {
 </style>
 
 <script is:inline src="/sdk/mst.js"></script>
-<script is:inline src="/js/home-test.js?v=headstart1"></script>
+<script is:inline src="/js/result-card.js?v=card1"></script>
+<script is:inline src="/js/home-test.js?v=headstart2"></script>
